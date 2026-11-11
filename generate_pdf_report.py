@@ -1,18 +1,18 @@
 """Generates a professional executive PDF report for Zamp Vendor Onboarding Case Study."""
-import os
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, HRFlowable
 )
 from reportlab.pdfgen import canvas
 
+
 class NumberedCanvas(canvas.Canvas):
     """Adds running headers and footers with Page X of Y."""
+
     def __init__(self, *args, **kwargs):
-        super(NumberedCanvas, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._saved_page_states = []
 
     def showPage(self):
@@ -24,15 +24,14 @@ class NumberedCanvas(canvas.Canvas):
         for state in self._saved_page_states:
             self.__dict__.update(state)
             self.draw_page_decorations(num_pages)
-            super(NumberedCanvas, self).showPage()
-        super(NumberedCanvas, self).save()
+            super().showPage()
+        super().save()
 
     def draw_page_decorations(self, page_count):
         self.saveState()
         self.setFont("Helvetica-Bold", 8)
         self.setFillColor(colors.HexColor("#64748b"))
 
-        # Header (Pages > 1)
         if self._pageNumber > 1:
             self.drawString(54, 750, "ZAMP AP — AUTONOMOUS VENDOR ONBOARDING INTELLIGENCE REPORT")
             self.drawRightString(612 - 54, 750, "PROBLEM STATEMENT 2")
@@ -40,15 +39,29 @@ class NumberedCanvas(canvas.Canvas):
             self.setLineWidth(0.5)
             self.line(54, 742, 612 - 54, 742)
 
-        # Footer (All pages)
         self.setStrokeColor(colors.HexColor("#cbd5e1"))
         self.setLineWidth(0.5)
         self.line(54, 45, 612 - 54, 45)
-        
+
         self.setFont("Helvetica", 8)
         self.drawString(54, 32, "Confidential — For Evaluation Purposes Only | Author: Jayaprakash Dhanekula")
         self.drawRightString(612 - 54, 32, f"Page {self._pageNumber} of {page_count}")
         self.restoreState()
+
+
+def _styled_table(data, col_widths, border_color, header_bg="#f1f5f9", valign="TOP"):
+    t = Table(data, colWidths=col_widths, repeatRows=1)
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(header_bg)),
+        ("BOX", (0, 0), (-1, -1), 0.6, border_color),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, border_color),
+        ("VALIGN", (0, 0), (-1, -1), valign),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    return t
 
 
 def build_pdf(filename="Zamp_Vendor_Onboarding_Evaluation_Report.pdf"):
@@ -58,337 +71,258 @@ def build_pdf(filename="Zamp_Vendor_Onboarding_Evaluation_Report.pdf"):
         leftMargin=54,
         rightMargin=54,
         topMargin=54,
-        bottomMargin=54
+        bottomMargin=54,
     )
 
     styles = getSampleStyleSheet()
+    c_primary = colors.HexColor("#ea580c")
+    c_dark = colors.HexColor("#0f172a")
+    c_sub = colors.HexColor("#475569")
+    c_border = colors.HexColor("#cbd5e1")
 
-    # Custom Palette
-    c_primary = colors.HexColor("#ea580c")    # Deep Cyber Orange
-    c_dark = colors.HexColor("#0f172a")       # Slate 900
-    c_sub = colors.HexColor("#475569")        # Slate 600
-    c_border = colors.HexColor("#e2e8f0")     # Slate 200
-    c_bg_light = colors.HexColor("#f8fafc")   # Slate 50
-    c_green = colors.HexColor("#16a34a")
-
-    # Typography Styles
     style_title = ParagraphStyle(
-        'DocTitle',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=20,
-        leading=24,
-        textColor=c_primary,
-        spaceAfter=4
+        "DocTitle", parent=styles["Normal"], fontName="Helvetica-Bold",
+        fontSize=19, leading=23, textColor=c_primary, spaceAfter=4
     )
     style_subtitle = ParagraphStyle(
-        'DocSubtitle',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=11,
-        leading=15,
-        textColor=c_sub,
-        spaceAfter=12
+        "DocSubtitle", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=10.5, leading=14, textColor=c_sub, spaceAfter=10
     )
     style_h1 = ParagraphStyle(
-        'SectionH1',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=13,
-        leading=17,
-        textColor=c_dark,
-        spaceBefore=14,
-        spaceAfter=6,
-        keepWithNext=True
+        "SectionH1", parent=styles["Normal"], fontName="Helvetica-Bold",
+        fontSize=12.5, leading=16, textColor=c_dark, spaceBefore=12, spaceAfter=5, keepWithNext=True
     )
     style_h2 = ParagraphStyle(
-        'SectionH2',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=10.5,
-        leading=14,
-        textColor=c_primary,
-        spaceBefore=8,
-        spaceAfter=4,
-        keepWithNext=True
+        "SectionH2", parent=styles["Normal"], fontName="Helvetica-Bold",
+        fontSize=10, leading=13.5, textColor=c_primary, spaceBefore=7, spaceAfter=3, keepWithNext=True
     )
     style_body = ParagraphStyle(
-        'BodyDark',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=9,
-        leading=13.5,
-        textColor=colors.HexColor("#1e293b"),
-        spaceAfter=6
+        "BodyDark", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=9, leading=13.5, textColor=colors.HexColor("#1e293b"), spaceAfter=5
     )
     style_callout = ParagraphStyle(
-        'CalloutText',
-        parent=styles['Normal'],
-        fontName='Helvetica-Oblique',
-        fontSize=9,
-        leading=13.5,
-        textColor=colors.HexColor("#0f172a")
+        "CalloutText", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=9, leading=13.5, textColor=c_dark
     )
-    style_table_h = ParagraphStyle(
-        'TableHead',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=8.5,
-        leading=11,
-        textColor=c_dark
+    style_th = ParagraphStyle(
+        "TableHead", parent=styles["Normal"], fontName="Helvetica-Bold",
+        fontSize=8.3, leading=11, textColor=c_dark
     )
-    style_table_c = ParagraphStyle(
-        'TableCell',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=8,
-        leading=11,
-        textColor=colors.HexColor("#1e293b")
+    style_tc = ParagraphStyle(
+        "TableCell", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=8, leading=11, textColor=colors.HexColor("#1e293b")
     )
 
     story = []
 
-    # Title & Header
+    # Header
     story.append(Paragraph("Zamp AP — Autonomous Vendor Onboarding Intelligence", style_title))
-    story.append(Paragraph("System Architecture, Deterministic Risk Engineering, and Verification Pipeline Report", style_subtitle))
+    story.append(Paragraph(
+        "System Architecture, Risk Engineering &amp; Verification Capabilities Report (Problem Statement 2)",
+        style_subtitle
+    ))
     story.append(HRFlowable(width="100%", thickness=1.5, color=c_primary, spaceBefore=0, spaceAfter=10))
 
-    # Architecture Principle Callout Box
+    # Core Principle Box
     principle_text = (
         "<b>Core Architectural Principle: Rules Decide, the LLM Only Communicates.</b><br/>"
-        "In enterprise Accounts Payable, automated money-movement and supplier enablement require 100% deterministic, "
-        "auditable, and reproducible decisions. The system executes a rigorous 7-stage rule engine applying mathematical "
-        "checksums, entity resolution, and fraud-pattern heuristics. An LLM prompt is never permitted to make the final "
-        "financial risk call; rather, the LLM is deployed solely behind strict output guardrails to draft polite, empathetic "
-        "vendor correspondence."
+        "In enterprise Accounts Payable, automated money movement and vendor enablement demand 100% deterministic, "
+        "auditable, and reproducible decisions. This engine executes 6 automated validation stages plus a weighted "
+        "decision &amp; risk-scoring gate using mathematical checksums, semantic entity normalization, and BEC fraud "
+        "heuristics. An LLM (Gemini 3.5 Flash-Lite) is never allowed to decide approval or rejection; it operates strictly "
+        "behind safety guardrails solely to compose polite vendor correspondence."
     )
     t_callout = Table([[Paragraph(principle_text, style_callout)]], colWidths=[504])
     t_callout.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#fff7ed")), # warm orange tint
-        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor("#fdba74")),
-        ('LINEBEFORE', (0, 0), (0, -1), 4, c_primary),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fff7ed")),
+        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#fdba74")),
+        ("LINEBEFORE", (0, 0), (0, -1), 4, c_primary),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
     ]))
     story.append(t_callout)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 8))
 
-    # Executive Overview
-    story.append(Paragraph("1. Executive Summary & Problem Scope", style_h1))
-    story.append(Paragraph(
-        "Accounts Payable (AP) departments process dozens of vendor onboarding submissions every quarter. "
-        "Manual review across company details, bank coordinates, and compliance certificates is notoriously prone to "
-        "human fatigue on high-volume days. A single undetected inconsistency can precipitate multimillion-dollar payment fraud "
-        "or compliance debarment. This platform automates ingestion through 7 sequential gates, evaluating complete validity, "
-        "synthesizing a 0–100 Composite Risk Score, and generating auditable decision records in under 35 milliseconds.",
-        style_body
-    ))
+    # 1. Executive Strengths Highlights
+    story.append(Paragraph("1. Key Project Strengths at a Glance", style_h1))
+    strengths_data = [
+        [Paragraph("Capability Pillar", style_th), Paragraph("Why It Stands Out", style_th)],
+        [
+            Paragraph("<b>Deterministic Decisioning</b>", style_tc),
+            Paragraph("Every rule emits a structured effect tag (<i>none / fix / review / block</i>). Decisions are 100% explainable, fast (~30 ms pipeline latency), and immune to LLM hallucinations.", style_tc)
+        ],
+        [
+            Paragraph("<b>True Mathematical Checksums</b>", style_tc),
+            Paragraph("Validates Indian GSTIN (Mod-36 + 38 states + PAN), US ABA routing (FedWire Mod-10), and EU/UK/DE IBANs (ISO 7064 Mod-97) rather than superficial regex pattern checks.", style_tc)
+        ],
+        [
+            Paragraph("<b>Offline 40-Bank Directory</b>", style_tc),
+            Paragraph("Maps 40 IFSC, ABA, and SWIFT/BIC prefixes to official bank names without external API failure risk, catching mismatched bank names vs. routing codes automatically.", style_tc)
+        ],
+        [
+            Paragraph("<b>Smart Entity Normalization</b>", style_tc),
+            Paragraph("Strips 24 global corporate suffixes (<i>Pvt Ltd, LLC, GmbH, Inc, Sarl</i>) and runs dual SequenceMatcher similarity so valid suffix variants pass while third-party mule accounts are stopped.", style_tc)
+        ],
+        [
+            Paragraph("<b>BEC &amp; Account-Takeover Defense</b>", style_tc),
+            Paragraph("Detects bank-detail changes and look-alike domains on active ERP vendors, mandates out-of-band phone callback, and routes confirmation emails strictly to the <b>contact ON FILE</b>—never the submitter.", style_tc)
+        ],
+        [
+            Paragraph("<b>Differential Resubmission Diffing</b>", style_tc),
+            Paragraph("Tracks SQLite run history per legal entity and computes exact deltas across attempts: <i>Resolved</i>, <i>Still Open</i>, and <i>New Anomalies</i>.", style_tc)
+        ],
+        [
+            Paragraph("<b>0–100 Composite Risk Score</b>", style_tc),
+            Paragraph("Aggregates severity and fraud signals into Low / Medium / High / Critical risk bands with a visual progress gauge for instant ops triage.", style_tc)
+        ],
+        [
+            Paragraph("<b>Guardrailed LLM + Fallback</b>", style_tc),
+            Paragraph("Uses Gemini 3.5 Flash-Lite (with multi-model fallback) behind 9 forbidden-term filters, account-number redaction, and deterministic template fallback so onboarding never halts.", style_tc)
+        ],
+        [
+            Paragraph("<b>Zero-Setup Executive Dashboard</b>", style_tc),
+            Paragraph("Auto-seeds all 9 benchmark runs on first launch with live KPIs, top failure charts, status/vendor filtering, and one-click Deep Inspection replay.", style_tc)
+        ],
+    ]
+    story.append(_styled_table(strengths_data, [145, 359], c_border))
+    story.append(Spacer(1, 8))
 
-    # 7 Stages Table
-    story.append(Paragraph("2. Multi-Stage Deterministic Verification Engine", style_h1))
-    
+    # 2. 7-Stage Pipeline
+    story.append(Paragraph("2. Multi-Stage Verification Architecture", style_h1))
     stages_data = [
-        [Paragraph("Stage", style_table_h), Paragraph("Verification Target", style_table_h), Paragraph("Algorithmic Logic & Invariants", style_table_h), Paragraph("Outcome Impact", style_table_h)],
+        [Paragraph("Stage", style_th), Paragraph("Verification Focus", style_th), Paragraph("Core Logic &amp; Cross-Checks", style_th), Paragraph("Decision Effect", style_th)],
         [
-            Paragraph("<b>1. Intake</b>", style_table_c),
-            Paragraph("Field presence & compliance docs", style_table_c),
-            Paragraph("Validates mandatory company/banking attributes, checks the 3 required certificates, and enforces RFC 5322 email syntax. Bank code requirement adapts dynamically to jurisdiction.", style_table_c),
-            Paragraph("Missing items &rarr; <b>PENDING (Fix)</b>", style_table_c)
+            Paragraph("<b>1. Intake</b>", style_tc),
+            Paragraph("Mandatory fields &amp; 3 compliance docs", style_tc),
+            Paragraph("Validates company/banking inputs, dynamic jurisdiction-aware bank code requirement (IN/US/GB), RFC-style email format, and 3 required documents.", style_tc),
+            Paragraph("Missing &rarr; <b>PENDING (Fix)</b>", style_tc)
         ],
         [
-            Paragraph("<b>2. Tax Integrity</b>", style_table_c),
-            Paragraph("National Tax IDs & Checksums", style_table_c),
-            Paragraph("Implements Luhn Mod-36 GSTIN checksum (India), IRS EIN prefix table (US), and European/Singapore VAT formats. Detects cross-country tax misrepresentation.", style_table_c),
-            Paragraph("Checksum fail &rarr; <b>Fix</b><br/>Foreign Tax &rarr; <b>Review</b>", style_table_c)
+            Paragraph("<b>2. Tax ID</b>", style_tc),
+            Paragraph("Checksums &amp; jurisdiction extraction", style_tc),
+            Paragraph("Runs GSTIN Mod-36 checksum (plus state name &amp; PAN extraction), IRS EIN prefix validation, and UK/DE VAT + SG UEN verification. Detects valid foreign tax IDs.", style_tc),
+            Paragraph("Bad check &rarr; <b>Fix</b><br/>Foreign ID &rarr; <b>Stage 5</b>", style_tc)
         ],
         [
-            Paragraph("<b>3. Bank Detail</b>", style_table_c),
-            Paragraph("Routing checks & Bank Directory", style_table_c),
-            Paragraph("Computes US ABA Mod-10, European IBAN Mod-97, and Indian IFSC checksums. Cross-checks bank code against an offline registry of 40+ institutions to verify bank name alignment.", style_table_c),
-            Paragraph("Format fail &rarr; <b>Fix</b><br/>Bank Mismatch &rarr; <b>Review</b>", style_table_c)
+            Paragraph("<b>3. Bank Detail</b>", style_tc),
+            Paragraph("Routing math &amp; semantic bank lookup", style_tc),
+            Paragraph("Executes IFSC/ABA Mod-10/IBAN Mod-97 checks, resolves bank code via 40-institution offline directory, and checks &ge;60% similarity with declared bank name.", style_tc),
+            Paragraph("Bad format &rarr; <b>Fix</b><br/>Name clash &rarr; <b>Review</b>", style_tc)
         ],
         [
-            Paragraph("<b>4. Payee Match</b>", style_table_c),
-            Paragraph("Entity fuzzy matching", style_table_c),
-            Paragraph("Prunes 24 international corporate suffixes (Pvt Ltd, LLC, GmbH), normalizes case/punctuation, and computes token-sorted similarity. Flags third-party mule accounts.", style_table_c),
-            Paragraph("&ge;90% &rarr; <b>PASS</b><br/>70-89% &rarr; <b>Review</b><br/>&lt;70% &rarr; <b>Mule Alert</b>", style_table_c)
+            Paragraph("<b>4. Payee Match</b>", style_tc),
+            Paragraph("Entity resolution &amp; mule detection", style_tc),
+            Paragraph("Prunes 24 legal suffixes, normalizes punctuation, and compares sorted &amp; linear token similarity (&ge;90% pass, 70–89% partial review, &lt;70% mule alert).", style_tc),
+            Paragraph("&ge;90% &rarr; <b>PASS</b><br/>&lt;90% &rarr; <b>Review</b>", style_tc)
         ],
         [
-            Paragraph("<b>5. Cross-Field</b>", style_table_c),
-            Paragraph("Multi-attribute invariance", style_table_c),
-            Paragraph("Verifies Tax Country vs Declared Country; flags offshore banking routes; validates country-specific postal patterns (PIN, ZIP, PLZ); detects email domain alignment.", style_table_c),
-            Paragraph("Mismatch &rarr; <b>Review</b><br/>Free-mail &rarr; <b>Advisory</b>", style_table_c)
+            Paragraph("<b>5. Cross-Field</b>", style_tc),
+            Paragraph("Multi-attribute consistency", style_tc),
+            Paragraph("Matches Tax ID country vs. vendor country, flags offshore bank countries, verifies country postal codes (PIN/ZIP/PLZ/postcode), and checks domain-name alignment.", style_tc),
+            Paragraph("Country clash &rarr; <b>Review</b><br/>Free-mail &rarr; <b>Advisory</b>", style_tc)
         ],
         [
-            Paragraph("<b>6. Registry</b>", style_table_c),
-            Paragraph("Watchlist & BEC Defense", style_table_c),
-            Paragraph("Scans internal watchlist on account, tax ID, and name. Re-identifies active ERP vendors to flag duplicate records or unauthorized bank changes on existing vendors.", style_table_c),
-            Paragraph("Watchlist &rarr; <b>REJECT</b><br/>Bank Change &rarr; <b>Review</b>", style_table_c)
+            Paragraph("<b>6. Registry</b>", style_tc),
+            Paragraph("Watchlist, duplicates &amp; BEC", style_tc),
+            Paragraph("Screens internal fraud/debarment watchlist (account, tax ID, normalized name), detects duplicate active vendors, and flags bank changes or look-alike domains.", style_tc),
+            Paragraph("Watchlist/Dup &rarr; <b>REJECT</b><br/>Bank change &rarr; <b>Review</b>", style_tc)
         ],
         [
-            Paragraph("<b>7. Decision</b>", style_table_c),
-            Paragraph("Risk scoring & dispatch", style_table_c),
-            Paragraph("Synthesizes overall status, produces a 0–100 Composite Risk Score, and passes sanitized facts to Gemini (or template fallback) for vendor communication.", style_table_c),
-            Paragraph("ERP Enablement or Ops Escrow", style_table_c)
+            Paragraph("<b>7. Decision</b>", style_tc),
+            Paragraph("Risk scoring &amp; dispatch", style_tc),
+            Paragraph("Aggregates block/review/fix signals into APPROVED, PENDING, or REJECTED, computes 0–100 risk score, runs resubmission diffing, and dispatches email.", style_tc),
+            Paragraph("ERP Enable, Hold, or Stop", style_tc)
         ],
     ]
-    t_stages = Table(stages_data, colWidths=[70, 110, 214, 110])
-    t_stages.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-        ('BOX', (0, 0), (-1, -1), 0.5, c_border),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, c_border),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-    ]))
-    story.append(t_stages)
-    story.append(Spacer(1, 10))
-
+    story.append(_styled_table(stages_data, [68, 102, 232, 102], c_border))
     story.append(PageBreak())
 
-    # Checksum Engines Detail
-    story.append(Paragraph("3. Mathematical Checksum Engines vs. Naive Regex", style_h1))
+    # 3. Deep Technical Strengths
+    story.append(Paragraph("3. Mathematical Checksums &amp; Offline Banking Intelligence", style_h1))
     story.append(Paragraph(
-        "Commercial verification cannot rely on regular expressions alone because regex verifies only character shape, "
-        "not algorithmic authenticity. The application incorporates native mathematical check-digit algorithms:",
+        "Simple regular expressions only check character shape, allowing transposed digits to enter Accounts Payable. "
+        "This engine validates true check digits across major payment corridors:",
         style_body
     ))
-    story.append(Paragraph("<b>• Indian GSTIN (Luhn-variant Mod-36 Checksum):</b>", style_h2))
+    story.append(Paragraph("<b>• Indian GSTIN (Luhn-Variant Mod-36 + State &amp; PAN Extraction):</b>", style_h2))
     story.append(Paragraph(
-        "Over the 14-character alphanumeric body, alternating weights of 1 and 2 are applied to base-36 characters. "
-        "The quotient and remainder are summed to derive the 15th check character. This catches single-character transpositions. "
-        "The engine simultaneously extracts the 2-digit state code (verifying against 38 valid Indian tax jurisdictions, "
-        "e.g., 36 &rarr; Telangana, 27 &rarr; Maharashtra) and isolates the legal PAN.",
+        "Applies alternating weights (1, 2) in base-36 across the first 14 characters to verify the 15th check digit, "
+        "validates against all 38 official Indian GST state codes (e.g., 36 &rarr; Telangana, 27 &rarr; Maharashtra), and "
+        "isolates the embedded 10-character PAN.",
         style_body
     ))
-    story.append(Paragraph("<b>• US ABA Routing Number Checksum:</b>", style_h2))
+    story.append(Paragraph("<b>• US FedWire ABA Routing (Weighted Mod-10) &amp; European IBAN (ISO 7064 Mod-97):</b>", style_h2))
     story.append(Paragraph(
-        "Verifies the 9-digit FedWire routing number using the weighted Federal Reserve checksum: "
-        "(3·d1 + 7·d2 + 1·d3 + 3·d4 + 7·d5 + 1·d6 + 3·d7 + 7·d8 + 1·d9) mod 10 = 0.",
+        "Verifies 9-digit US routing numbers via (3·d1 + 7·d2 + 1·d3 + ... + 1·d9) mod 10 = 0, and transforms EU/UK/DE "
+        "IBANs into integer streams enforcing (N mod 97 = 1).",
         style_body
     ))
-    story.append(Paragraph("<b>• European & UAE IBAN Checksum (ISO 7064 / Mod-97):</b>", style_h2))
+    story.append(Paragraph("<b>• Offline 40-Institution Bank Registry &amp; Semantic Mismatch Detection:</b>", style_h2))
     story.append(Paragraph(
-        "Transforms 22–23 character IBANs into integers and enforces (N mod 97 = 1), preventing disbursement to miskeyed bank coordinates.",
-        style_body
-    ))
-
-    # Offline Bank Directory
-    story.append(Paragraph("4. Offline Semantic Bank Directory (Zero 3rd-Party API Reliance)", style_h1))
-    story.append(Paragraph(
-        "A common pitfall in candidate submissions is total reliance on third-party banking validation APIs, which fail under "
-        "sandbox conditions or network latency. The application overcomes this by embedding an <b>offline directory of 40+ financial institutions</b>:",
-        style_body
-    ))
-    story.append(Paragraph(
-        "• <b>Indian IFSC Prefixes (first 4 characters):</b> SBIN (State Bank of India), HDFC (HDFC Bank), ICIC (ICICI Bank), "
-        "UTIB (Axis Bank), PUNB (Punjab National Bank), BARB (Bank of Baroda), CNRB (Canara Bank), UBIN, KKBK, YESB, etc.<br/>"
-        "• <b>US ABA Routing Prefixes (first 4 digits):</b> 0210 (JPMorgan Chase), 0260 (Bank of America), 0710 (Wells Fargo), 0740 (PNC), 0440 (TD Bank).<br/>"
-        "• <b>International SWIFT/BIC:</b> DBSSSGSG (DBS Singapore), INGDDEFF (ING Germany), BARCGB22 (Barclays UK).<br/>"
-        "<b>Semantic Cross-Matching:</b> If a vendor specifies 'HDFC Bank' as the bank name but enters an IFSC code starting with 'SBIN', "
-        "the engine detects that the prefix resolves to State Bank of India and triggers a <b>Semantic Bank Name Mismatch</b> flag for review.",
+        "Embeds 40 verified prefixes (20 Indian IFSC codes such as SBIN, HDFC, ICIC, UTIB; 10 US ABA prefixes such as 0210 JPMorgan Chase, "
+        "0260 Bank of America; and 10 SWIFT/BIC codes across SG, DE, GB). Even if a vendor enters a valid checksum, declaring "
+        "'HDFC Bank' alongside an 'SBIN...' IFSC triggers an immediate semantic bank-name review flag—with zero third-party API dependency.",
         style_body
     ))
 
-    # Payee Name Match & Mule Account Pattern
-    story.append(Paragraph("5. Payee Entity Resolution & Mule Account Detection", style_h1))
+    # 4. BEC Defense & Guardrailed LLM
+    story.append(Paragraph("4. Business Email Compromise (BEC) Defense &amp; LLM Guardrails", style_h1))
     story.append(Paragraph(
-        "Direct string comparisons ('==') fail legitimate vendors who use regional legal variations. The engine applies a 3-step pipeline:<br/>"
-        "1. <b>Legal Suffix Stripping:</b> Prunes 24 international entity tokens (pvt, ltd, limited, llc, llp, inc, gmbh, ag, pte, plc, sarl).<br/>"
-        "2. <b>Punctuation Normalization:</b> Converts ampersands (& &rarr; and) and standardizes casing.<br/>"
-        "3. <b>Dual Sequence Matching:</b> Evaluates fuzzy similarity across both linear strings and alphabetically-sorted tokens.<br/>"
-        "<b>Fraud Guard:</b> When the legal entity is 'Brightpath Consulting LLC' and the account holder is 'Sunrise Trading Co' "
-        "(similarity &lt; 20%), the engine stops payment enablement immediately and flags a <b>Third-Party Mule Account Pattern</b>.",
+        "Invoice and bank-change redirection is one of the costliest AP attack vectors. When an active vendor's Tax ID matches "
+        "the master registry but presents a new bank account (such as <b>Orion Industrial Supplies GmbH</b> submitting a new IBAN "
+        "from look-alike domain <i>orion-industrial.co</i> instead of <i>orion-industrial.de</i>):",
+        style_body
+    ))
+    story.append(Paragraph(
+        "1. <b>Pending Hold Instead of Hard Reject:</b> Avoids blocking legitimate treasury switches while freezing automated payouts.<br/>"
+        "2. <b>Safe Target Routing:</b> Confirmation emails are routed strictly to the <b>verified email ON FILE</b> (<i>procurement@orion-industrial.de</i>), "
+        "never the incoming submitter, preventing an attacker with a spoofed or compromised mailbox from confirming the redirect.<br/>"
+        "3. <b>Zero-Leak Watchlist Declines:</b> Debarred or fraud-linked submissions receive a neutral decline without revealing detection logic.<br/>"
+        "4. <b>Sanitized LLM Dispatch (Gemini 3.5 Flash-Lite):</b> The LLM receives only vendor-safe facts (never internal fraud flags or watchlist notes), "
+        "passes output through 9 forbidden-keyword checks (<i>watchlist, blocklist, fraud, suspicious, sanction, debar, mule, risk score, compromise</i>) "
+        "plus account-number leakage checks, and falls back across <i>gemini-3.8-flash</i> / <i>gemini-2.5-flash-lite</i> or deterministic templates on any failure.",
         style_body
     ))
 
-    story.append(PageBreak())
-
-    # Business Email Compromise Defense
-    story.append(Paragraph("6. Business Email Compromise (BEC) & Out-of-Band Defense", style_h1))
+    # 5. Composite Risk Scoring & Live Benchmark Results
+    story.append(Paragraph("5. Composite Risk Scoring &amp; Verified Scenario Benchmarks", style_h1))
     story.append(Paragraph(
-        "Payment redirection fraud via Business Email Compromise accounts for over $2.7 billion in annual enterprise losses. "
-        "In <b>Edge Case 3 (Orion Supplies)</b>, an existing vendor's tax ID matches active ERP records, but an incoming submission "
-        "presents a new IBAN and an email originating from a look-alike domain (orion-industrial.co instead of orion-industrial.de).",
-        style_body
-    ))
-    story.append(Paragraph(
-        "The engine addresses this with four purposeful defense mechanisms:<br/>"
-        "1. <b>State Isolation:</b> The record is set to <b>PENDING + Manual Review</b> rather than rejected, enabling legitimate banking updates.<br/>"
-        "2. <b>Out-of-Band Callback Protocol:</b> Flags an imperative instruction for finance ops to perform phone verification to the verified number on file.<br/>"
-        "3. <b>Security Contact Routing (Critical Strength):</b> The automated verification alert is <b>deliberately routed to the contact on file in the ERP, NOT the submitter</b>. "
-        "Replying to the submitter in an account-takeover scenario would simply hand the confirmation channel to the attacker.<br/>"
-        "4. <b>Zero Fraud Disclosure:</b> Rejections and watchlist hits trigger neutral decline notices, preventing threat actors from learning internal heuristics.",
+        "The engine synthesizes every check into a bounded 0–100 Composite Risk Score (<b>0–20 Low</b>, <b>21–45 Medium</b>, "
+        "<b>46–70 High</b>, <b>71–100 Critical</b>): base severity adds +40 for <i>block</i>, +20 for <i>review</i>, and +10 for <i>fix</i>, "
+        "layered with fraud-specific multipliers (+50 watchlist, +25 bank change, +20 look-alike contact domain, +15 offshore bank country, +5 free mailbox).",
         style_body
     ))
 
-    # Composite Risk Scoring Framework
-    story.append(Paragraph("7. Composite Risk Scoring Framework (0–100 Gauge)", style_h1))
-    story.append(Paragraph(
-        "Every submission receives an automated 0–100 Composite Risk Score displayed on a visual cyber-risk gauge, enabling immediate operational triage:",
-        style_body
-    ))
-    
-    risk_data = [
-        [Paragraph("Heuristic / Anomaly Signal", style_table_h), Paragraph("Points Added", style_table_h), Paragraph("Operational Rationale", style_table_h)],
-        [Paragraph("Internal Watchlist Hit (Account/Tax/Name)", style_table_c), Paragraph("<b>+50 pts</b>", style_table_c), Paragraph("Direct correlation with confirmed payment fraud or debarment lists.", style_table_c)],
-        [Paragraph("Bank Detail Change on Existing Vendor", style_table_c), Paragraph("<b>+25 pts</b>", style_table_c), Paragraph("High velocity payment redirection indicator (primary BEC attack vector).", style_table_c)],
-        [Paragraph("Look-Alike Email Domain Anomaly", style_table_c), Paragraph("<b>+20 pts</b>", style_table_c), Paragraph("Domain divergence from verified corporate record on file.", style_table_c)],
-        [Paragraph("Payee Name Mismatch (Mule Account)", style_table_c), Paragraph("<b>+20 pts</b>", style_table_c), Paragraph("Account holder deviates from registered incorporation documents.", style_table_c)],
-        [Paragraph("Bank Country Mismatch (Offshore Route)", style_table_c), Paragraph("<b>+15 pts</b>", style_table_c), Paragraph("Settlement jurisdiction outside country of incorporation.", style_table_c)],
-        [Paragraph("Unresolved Field or Missing Compliance Cert", style_table_c), Paragraph("<b>+10 pts</b>", style_table_c), Paragraph("Vendor clerical oversight, missing documentation, or format typo.", style_table_c)],
-        [Paragraph("Free Mailbox Domain (Gmail / Yahoo / Outlook)", style_table_c), Paragraph("<b>+5 pts</b>", style_table_c), Paragraph("Advisory signal indicating absence of enterprise email infrastructure.", style_table_c)],
+    bench_data = [
+        [Paragraph("Scenario", style_th), Paragraph("Decision", style_th), Paragraph("Checks", style_th), Paragraph("Risk Score", style_th), Paragraph("Key Judgment Demonstrated", style_th)],
+        [Paragraph("<b>Happy Path</b> (Apex Cloud, IN)", style_tc), Paragraph("APPROVED", style_tc), Paragraph("15/15", style_tc), Paragraph("0 / Low", style_tc), Paragraph("GSTIN Mod-36 + state 36, IFSC &rarr; HDFC match, PIN &amp; domain verified.", style_tc)],
+        [Paragraph("<b>Edge 1a</b> (Green Valley, IN)", style_tc), Paragraph("APPROVED", style_tc), Paragraph("15/15", style_tc), Paragraph("0 / Low", style_tc), Paragraph("Normalizes 'Private Limited' vs 'PVT LTD' without false friction.", style_tc)],
+        [Paragraph("<b>Edge 1b</b> (Brightpath, US)", style_tc), Paragraph("PENDING", style_tc), Paragraph("13/14", style_tc), Paragraph("20 / Low", style_tc), Paragraph("Valid ABA 0210 (Chase), catches third-party payee 'Sunrise Trading Co'.", style_tc)],
+        [Paragraph("<b>Edge 2</b> (Sterling Bridge, GB)", style_tc), Paragraph("PENDING", style_tc), Paragraph("11/14", style_tc), Paragraph("55 / High", style_tc), Paragraph("Detects Indian GSTIN &amp; Axis Bank on a claimed UK incorporation.", style_tc)],
+        [Paragraph("<b>Edge 3</b> (Orion Supplies, DE)", style_tc), Paragraph("PENDING", style_tc), Paragraph("13/15", style_tc), Paragraph("85 / Critical", style_tc), Paragraph("BEC bank change + .co look-alike domain; email routed to contact ON FILE.", style_tc)],
+        [Paragraph("<b>Edge 4a</b> (Nimbus Labs, US)", style_tc), Paragraph("PENDING", style_tc), Paragraph("8/11", style_tc), Paragraph("30 / Medium", style_tc), Paragraph("Missing email, missing bank proof, invalid IRS EIN prefix '07'.", style_tc)],
+        [Paragraph("<b>Edge 4b</b> (Nimbus Resubmit)", style_tc), Paragraph("PENDING", style_tc), Paragraph("12/13", style_tc), Paragraph("10 / Low", style_tc), Paragraph("Delta engine isolates 2 Resolved items vs 1 Still Open bad EIN.", style_tc)],
+        [Paragraph("<b>Bonus</b> (Quickpay, SG)", style_tc), Paragraph("REJECTED", style_tc), Paragraph("12/14", style_tc), Paragraph("100 / Critical", style_tc), Paragraph("Hard-stops fraud-linked account 0721983456; neutral zero-leak email.", style_tc)],
+        [Paragraph("<b>Bonus</b> (Kestrel, GB)", style_tc), Paragraph("REJECTED", style_tc), Paragraph("11/12", style_tc), Paragraph("40 / Medium", style_tc), Paragraph("Prevents duplicate ERP record creation for active vendor V-1010.", style_tc)],
     ]
-    t_risk = Table(risk_data, colWidths=[180, 80, 244])
-    t_risk.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-        ('BOX', (0, 0), (-1, -1), 0.5, c_border),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, c_border),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-    ]))
-    story.append(t_risk)
-    story.append(Spacer(1, 10))
+    story.append(_styled_table(bench_data, [118, 60, 44, 62, 220], c_border, valign="MIDDLE"))
+    story.append(Spacer(1, 8))
 
-    # Resubmission Diffing & Delta Analysis
-    story.append(Paragraph("8. Differential Resubmission Engine (Delta Tracking)", style_h1))
+    # 6. Honest Boundaries & Production Roadmap
+    story.append(Paragraph("6. Scope Boundaries &amp; Enterprise Production Roadmap", style_h1))
     story.append(Paragraph(
-        "When an incomplete or flagged application is resubmitted (e.g., <b>Edge Case 4b</b>, where a vendor corrects their contact email and "
-        "attaches their bank proof but leaves their invalid EIN uncorrected), the engine executes an automated differential analysis against the preceding attempt in SQLite. "
-        "The dashboard isolates findings into three distinct categories:<br/>"
-        "• <b>Resolved:</b> Items cleared since the last attempt (e.g., Contact Email Provided, Bank Proof Attached).<br/>"
-        "• <b>Still Open:</b> Deficiencies persisting uncorrected (e.g., US EIN Prefix Invalid).<br/>"
-        "• <b>New Anomalies:</b> Discrepancies introduced in the latest payload.",
-        style_body
-    ))
-
-    # Guardrailed LLM & Resilience
-    story.append(Paragraph("9. Guardrailed LLM Communication & Graceful Degradation", style_h1))
-    story.append(Paragraph(
-        "Communication dispatch is powered by Gemini 1.5 Flash behind four strict security filters:<br/>"
-        "1. <b>Data Isolation:</b> Internal risk labels, watchlist match reasons, and internal security flags are completely omitted from the prompt context.<br/>"
-        "2. <b>Forbidden Keyword Redaction:</b> Outbound drafts are scanned for 10 restricted terms (fraud, mule, watchlist, sanctions, suspicious, compromise).<br/>"
-        "3. <b>Account Masking:</b> Bank account numbers are strictly redacted from outbound correspondence.<br/>"
-        "4. <b>Deterministic Template Fallback:</b> If API credentials are absent, network latency occurs, or safety checks fail, the engine defaults "
-        "instantaneously to structured, pre-compiled templates. <b>The operational pipeline never fails.</b>",
-        style_body
-    ))
-
-    # Production Roadmap
-    story.append(Paragraph("10. System Boundaries & Enterprise Production Roadmap", style_h1))
-    story.append(Paragraph(
-        "Intellectual honesty regarding current prototype boundaries demonstrates true engineering maturity:<br/>"
-        "• <b>Live Authority Integrations:</b> The prototype verifies mathematical checksums and prefix tables. Production would connect to live API gateways: GSTN (India), IRS TIN Matching (US), VIES (EU), and ACRA (Singapore).<br/>"
-        "• <b>Automated Payee Confirmation:</b> Account ownership is validated via algorithmic entity resolution. Production would integrate real-time penny-drop verification (RazorpayX, Cashfree) or Confirmation-of-Payee (UK/EU).<br/>"
-        "• <b>Document OCR Understanding:</b> Document presence is currently validated via checklists. The next milestone incorporates an OCR vision model to extract text directly from tax certificates and compare against submitted form values.",
+        "The prototype intentionally maintains clear engineering boundaries while keeping integration seams clean for production:<br/>"
+        "• <b>Live Tax &amp; Entity Registries:</b> Mathematical checksums and prefix tables serve as fast local gates; production connects directly to GSTN (India), IRS TIN Matching (US), EU VIES, and ACRA (Singapore).<br/>"
+        "• <b>Account Ownership Verification:</b> Algorithmic entity resolution pairs cleanly with real-time penny-drop APIs (RazorpayX / Cashfree) and UK/EU Confirmation of Payee.<br/>"
+        "• <b>Document OCR &amp; Persistence:</b> Uploaded document checklists upgrade directly to multimodal OCR extraction against form fields, backed by PostgreSQL + analyst SLA queues in place of ephemeral SQLite.",
         style_body
     ))
 
     doc.build(story, canvasmaker=NumberedCanvas)
     print(f"Report successfully compiled to {filename}")
+
 
 if __name__ == "__main__":
     build_pdf()
