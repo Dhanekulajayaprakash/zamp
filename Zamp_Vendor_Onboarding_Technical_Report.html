@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zamp AP — Autonomous Vendor Onboarding Intelligence: Technical & Architecture Evaluation Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 18mm 18mm 18mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.55;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  h1, h2, h3, h4 {
+    color: #0f172a;
+    font-weight: 700;
+    margin-top: 1.2em;
+    margin-bottom: 0.4em;
+    page-break-after: avoid;
+  }
+
+  h1 {
+    font-size: 19pt;
+    color: #ea580c; /* Deep Orange */
+    border-bottom: 2px solid #ea580c;
+    padding-bottom: 6px;
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: 13pt;
+    color: #0f172a;
+    border-left: 4px solid #ea580c;
+    padding-left: 8px;
+    margin-top: 1.5em;
+  }
+
+  h3 {
+    font-size: 11pt;
+    color: #334155;
+    margin-top: 1em;
+  }
+
+  p {
+    margin: 0.4em 0 0.8em 0;
+    text-align: justify;
+  }
+
+  .header-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9pt;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 8pt;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .badge-orange { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+  .badge-green { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .badge-blue { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+
+  .callout {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #ea580c;
+    border-radius: 4px;
+    padding: 9px 13px;
+    margin: 10px 0;
+    font-size: 9.5pt;
+  }
+
+  .callout strong {
+    color: #ea580c;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px 0;
+    font-size: 8.8pt;
+  }
+
+  th, td {
+    padding: 6px 8px;
+    border: 1px solid #cbd5e1;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  ul, ol {
+    margin: 0.3em 0 0.8em 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 3px;
+  }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 8.8pt;
+    color: #b91c1c;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .kpi-grid {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .kpi-box {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .kpi-title {
+    font-size: 7.8pt;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .kpi-val {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #ea580c;
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-meta">
+  <span><strong>Zamp AP Case Study — Problem Statement 2 (Operations)</strong></span>
+  <span><strong>Author:</strong> Jayaprakash Dhanekula</span>
+  <span><strong>Status:</strong> Production Prototype</span>
+</div>
+
+<h1>Autonomous Vendor Onboarding Intelligence Engine</h1>
+<p style="font-size: 10.5pt; color: #475569; margin-top: -6px; margin-bottom: 12px;">
+  <strong>System Architecture, Deterministic Risk Engineering, and Verification Pipeline Report</strong>
+</p>
+
+<div class="callout">
+  <strong>Core Architectural Philosophy: Rules Decide, the LLM Only Communicates.</strong><br>
+  In Accounts Payable and supply-chain operations, automated money-movement and banking-record creation must be 100% deterministic, auditable, and un-hallucinatable. An LLM prompt is never permitted to make the final financial risk call (Approve/Pending/Reject). Instead, an automated multi-stage deterministic pipeline executes mathematical checksums, entity resolution, and fraud-detection invariants. The LLM is deployed solely behind strict security guardrails to draft clear, polite vendor correspondence.
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi-box">
+    <div class="kpi-title">Verification Gates</div>
+    <div class="kpi-val">7 Stages</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-title">Average Run Latency</div>
+    <div class="kpi-val">&lt; 35 ms</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-title">Offline Bank Registry</div>
+    <div class="kpi-val">40+ Institutions</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-title">Auditability Score</div>
+    <div class="kpi-val">100% Deterministic</div>
+  </div>
+</div>
+
+<h2>1. Executive Summary & Design Tenets</h2>
+<p>
+Modern procurement teams process dozens of vendor onboarding packets quarterly. Traditional manual workflows suffer from high operational latency, lack of auditable logs, and acute vulnerability to Business Email Compromise (BEC) and third-party payment redirection. 
+</p>
+<p>
+This application replaces that manual burden with an end-to-end autonomous ingestion pipeline. A submission is evaluated against 7 discrete verification layers, yielding an instantaneous classification (<code>APPROVED</code>, <code>PENDING</code>, or <code>REJECTED</code>), a 0–100 Composite Risk Score, and a guardrailed vendor communication dispatch.
+</p>
+
+<h2>2. Multi-Stage Pipeline Architecture</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 14%;">Stage</th>
+      <th style="width: 28%;">Verification Target</th>
+      <th style="width: 38%;">Algorithmic Implementation</th>
+      <th style="width: 20%;">Outcome Impact</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1. Intake & Completeness</strong></td>
+      <td>Field presence, compliance checklist, email syntax.</td>
+      <td>Validates presence of mandatory entity fields, verifies the 3 required documents (Tax Cert, Incorporation, Bank Proof), and enforces RFC-compliant email formatting. Bank code requirements dynamically adapt to jurisdiction.</td>
+      <td>Missing items trigger <code>fix</code> &rarr; <strong>PENDING</strong></td>
+    </tr>
+    <tr>
+      <td><strong>2. Tax ID Integrity</strong></td>
+      <td>National tax ID format, structure, and check-digits.</td>
+      <td>Executes national tax validation algorithms across India, US, UK, Germany, and Singapore. Includes a mathematical checksum engine and cross-country tax format identification.</td>
+      <td>Invalid format triggers <code>fix</code>; cross-country triggers <code>review</code></td>
+    </tr>
+    <tr>
+      <td><strong>3. Bank Settlement Check</strong></td>
+      <td>Account number syntax, routing checksums, bank code prefixes.</td>
+      <td>Computes mathematical routing checksums (US ABA Mod-10, European IBAN Mod-97, Indian IFSC). Cross-references bank code prefixes against an embedded directory of 40+ institutions to verify bank name alignment.</td>
+      <td>Format failure &rarr; <code>fix</code>; Bank mismatch &rarr; <code>review</code></td>
+    </tr>
+    <tr>
+      <td><strong>4. Payee Entity Match</strong></td>
+      <td>Payee account holder vs. registered legal business name.</td>
+      <td>Normalizes strings by stripping corporate legal suffixes (<code>Pvt Ltd</code>, <code>LLC</code>, <code>GmbH</code>, <code>Pte</code>, etc.) and punctuation. Computes SequenceMatcher similarity on standard and token-sorted strings.</td>
+      <td>&ge;90% &rarr; <strong>PASS</strong><br>70–89% &rarr; <code>review</code><br>&lt;70% &rarr; Mule alert</td>
+    </tr>
+    <tr>
+      <td><strong>5. Cross-Field Invariance</strong></td>
+      <td>Multi-attribute coherence (Tax vs Country vs Bank vs Address).</td>
+      <td>Checks that tax ID country matches declared country, flags offshore bank accounts, verifies address postal code formats by nation (e.g. 6-digit Indian PIN, 5-digit US ZIP), and validates domain vs corporate name alignment.</td>
+      <td>Country mismatch &rarr; <code>review</code>; Advisory flags &rarr; Risk Score impact</td>
+    </tr>
+    <tr>
+      <td><strong>6. Registry & Watchlist</strong></td>
+      <td>Sanctions, duplicate vendor prevention, BEC attack detection.</td>
+      <td>Scans internal fraud watchlist on tax ID, account number, and entity name. Checks existing ERP registry for duplicate tax IDs. Detects bank account velocity changes and look-alike email domains on active vendors.</td>
+      <td>Watchlist / Duplicate &rarr; <strong>REJECTED</strong><br>Bank Change &rarr; <strong>PENDING (Manual)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>7. Decision & Risk Engine</strong></td>
+      <td>Final status, risk gauge (0–100), automated vendor dispatch.</td>
+      <td>Aggregates all gate findings into an authoritative status. Calculates a 0–100 Composite Risk Score. Dispatches facts to a guardrailed LLM to draft clean follow-up emails with fallback templates.</td>
+      <td>Final ERP enablement or Fraud Escalation</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>3. Mathematical Checksum Engines</h2>
+<p>
+Unlike naive systems that rely on basic regex length checks, this platform re-implements national mathematical checksum algorithms to catch data-entry typos and transpositions:
+</p>
+<ul>
+  <li><strong>Indian GSTIN (Luhn-variant Mod-36 Algorithm):</strong> The engine independently re-calculates the 15th check character over the first 14 characters using alternating weighting ($1, 2$) across base-36 characters. It extracts the 2-digit state code (verifying against 38 valid Indian tax states, e.g., <code>36 &rarr; Telangana</code>, <code>27 &rarr; Maharashtra</code>) and isolates the embedded PAN.</li>
+  <li><strong>United States ABA Routing Checksum:</strong> Verifies the 9-digit FedWire routing number via the weighted algorithm: 
+  $$(3d_1 + 7d_2 + 1d_3 + 3d_4 + 7d_5 + 1d_6 + 3d_7 + 7d_8 + 1d_9) \pmod{10} = 0$$</li>
+  <li><strong>IRS Employer Identification Number (EIN) Prefix Verification:</strong> Cross-checks the first two digits against the official ~80 valid IRS campus prefixes, rejecting invalid prefixes such as <code>07</code> or <code>17</code>.</li>
+  <li><strong>European & UAE IBAN Checksum (ISO 7064 / Mod-97):</strong> Converts alphanumeric country codes and BBAN into integers and checks $(N \pmod{97} = 1)$ to detect single-digit transpositions in 22–23 character strings.</li>
+</ul>
+
+<h2>4. Offline Semantic Bank Directory (Zero 3rd-Party API Dependencies)</h2>
+<p>
+Live banking validation APIs (such as Penny-Drop or Confirmation-of-Payee) require enterprise KYC and incurring per-call fees. To make the application fully self-contained and resilient against network outages, the engine embeds an offline directory of <strong>40+ major banking institutions</strong>:
+</p>
+<ul>
+  <li><strong>Indian IFSC Prefixes (first 4 characters):</strong> Resolves <code>SBIN</code> &rarr; State Bank of India, <code>HDFC</code> &rarr; HDFC Bank, <code>ICIC</code> &rarr; ICICI Bank, <code>UTIB</code> &rarr; Axis Bank, <code>PUNB</code> &rarr; Punjab National Bank, <code>BARB</code> &rarr; Bank of Baroda, <code>CNRB</code> &rarr; Canara Bank, <code>UBIN</code>, <code>IOBA</code>, <code>KKBK</code>, <code>YESB</code>, etc.</li>
+  <li><strong>US ABA Routing Prefixes (first 4 digits):</strong> Resolves <code>0210</code> &rarr; JPMorgan Chase, <code>0260</code> &rarr; Bank of America, <code>0710</code> &rarr; Wells Fargo, <code>0740</code> &rarr; PNC Bank, <code>0440</code> &rarr; HSBC, etc.</li>
+  <li><strong>International SWIFT/BIC Codes:</strong> Resolves <code>DBSSSGSG</code> &rarr; DBS Bank (Singapore), <code>INGDDEFF</code> &rarr; ING Bank (Germany), <code>DEUTDEFF</code> &rarr; Deutsche Bank, <code>BARCGB22</code> &rarr; Barclays (UK).</li>
+</ul>
+<div class="callout">
+  <strong>Semantic Cross-Verification in Action:</strong> If a vendor enters "HDFC Bank" in the bank name field but provides an IFSC code starting with <code>SBIN...</code>, the engine detects that <code>SBIN</code> resolves to State Bank of India and flags a <strong>Bank Name Semantic Mismatch</strong> for manual review.
+</div>
+
+<h2>5. Entity Resolution & Mule Account Detection</h2>
+<p>
+String equality checks fail in enterprise procurement because commercial entities frequently write variations of legal abbreviations (e.g., <code>Pvt Ltd</code> vs <code>Private Limited</code>).
+</p>
+<p>
+The Stage 4 Payee Name Matching engine applies a 3-step normalization algorithm:
+</p>
+<ol>
+  <li><strong>Legal Suffix Pruning:</strong> Removes 24 common international corporate identifiers: <code>private</code>, <code>pvt</code>, <code>limited</code>, <code>ltd</code>, <code>llc</code>, <code>llp</code>, <code>inc</code>, <code>corp</code>, <code>gmbh</code>, <code>ag</code>, <code>pte</code>, <code>plc</code>, <code>sarl</code>, <code>bv</code>, etc.</li>
+  <li><strong>Punctuation & Case Normalization:</strong> Strips special characters, standardizes ampersands (<code>&amp;</code> &rarr; <code>and</code>), and trims whitespace.</li>
+  <li><strong>Dual Sequence Matching:</strong> Runs comparative fuzzy similarity on both standard order and alphabetically-sorted tokens (preventing failures on inverted naming like <em>"Cloud Apex"</em> vs <em>"Apex Cloud"</em>).</li>
+</ol>
+<p>
+<strong>Operational Boundary:</strong> An account holder name differing completely from the registered entity (e.g., registered entity <em>Brightpath Consulting LLC</em> with account holder <em>Sunrise Trading Co</em>, similarity &lt; 20%) is stopped immediately as a <strong>Third-Party Mule Account Pattern</strong>.
+</p>
+
+<h2>6. Business Email Compromise (BEC) & Fraud Defense</h2>
+<p>
+Payment redirection via Business Email Compromise accounts for over \$2.7 billion in annual enterprise fraud losses. In <strong>Edge Case 3 (Orion Industrial Supplies)</strong>, an active vendor's tax ID matches ERP records, but an incoming submission requests routing to a new IBAN and originates from a look-alike domain (<code>orion-industrial.co</code> instead of <code>orion-industrial.de</code>).
+</p>
+<p>
+The engine counters this attack vector with deliberate architectural choices:
+</p>
+<ul>
+  <li><strong>State Preservation:</strong> The request is classified as <strong>PENDING + Manual Review</strong> (rather than hard-rejected, since genuine suppliers do legitimately migrate banking partners).</li>
+  <li><strong>Out-of-Band Callback Protocol:</strong> Payment enablement is locked pending a mandatory phone verification to the verified telephone number already recorded on file in the ERP.</li>
+  <li><strong>Security Contact Routing (Critical Feature):</strong> The automated system notification is <strong>deliberately routed to the registered contact on file, NOT the submitter</strong>. If an attacker has compromised an external rep's mailbox or spoofed a submission, sending confirmation to the submitter would hand the attacker control of the verification channel.</li>
+  <li><strong>No Internal Fraud Disclosure:</strong> Watchlist hits and fraud alarms trigger neutral decline notices. Telling a threat actor which internal heuristic caught them provides training feedback on how to evade controls in subsequent attempts.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>7. Composite Risk Scoring Methodology</h2>
+<p>
+Every submission receives an automated 0–100 Composite Risk Score displayed on a color-graded visual gauge. This provides procurement and finance operations with instant triaging capability:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Signal / Heuristic</th>
+      <th>Points Added</th>
+      <th>Operational Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Watchlist Hit (Account / Tax / Entity)</strong></td>
+      <td>+50 pts</td>
+      <td>Direct match against confirmed fraud accounts or debarred suppliers.</td>
+    </tr>
+    <tr>
+      <td><strong>Bank Account Change on Existing Vendor</strong></td>
+      <td>+25 pts</td>
+      <td>High velocity payment redirection indicator (primary BEC vector).</td>
+    </tr>
+    <tr>
+      <td><strong>Look-Alike Email Domain Anomaly</strong></td>
+      <td>+20 pts</td>
+      <td>Domain differs from ERP vendor master record.</td>
+    </tr>
+    <tr>
+      <td><strong>Payee Name Mismatch (Mule Account)</strong></td>
+      <td>+20 pts</td>
+      <td>Account holder diverges from registered corporate entity.</td>
+    </tr>
+    <tr>
+      <td><strong>Bank Country Mismatch (Offshore)</strong></td>
+      <td>+15 pts</td>
+      <td>Settlement jurisdiction outside country of incorporation.</td>
+    </tr>
+    <tr>
+      <td><strong>Each Unresolved Field / Fix Item</strong></td>
+      <td>+10 pts</td>
+      <td>Vendor clerical error, missing document, or tax format typo.</td>
+    </tr>
+    <tr>
+      <td><strong>Free Mailbox Domain (Gmail / Yahoo)</strong></td>
+      <td>+5 pts</td>
+      <td>Advisory signal indicating absence of enterprise email infrastructure.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+<strong>Risk Tiers:</strong> <strong>Low (0–20)</strong>: Direct straight-through ERP creation; <strong>Medium (21–45)</strong>: Minor vendor fix required; <strong>High (46–70)</strong>: Multi-signal escalation to Fraud Ops; <strong>Critical (71–100)</strong>: Hard block.
+</p>
+
+<h2>8. Differential Resubmission Engine (Delta Tracking)</h2>
+<p>
+When an incomplete or flagged application is resubmitted (e.g., <strong>Edge Case 4b</strong>, where a vendor corrects their email and uploads bank proof but re-submits the identical invalid EIN), the engine executes a differential comparison against the preceding run in SQLite.
+</p>
+<p>
+The dashboard highlights the exact delta across three categories:
+</p>
+<ul>
+  <li><span class="badge badge-green">Resolved</span> Items cleared since last submission (e.g., Contact Email Provided, Bank Proof Attached).</li>
+  <li><span class="badge badge-orange">Still Open</span> Items that persist uncorrected (e.g., US EIN Prefix Invalid).</li>
+  <li><span class="badge badge-blue">New Issues</span> Anomalies introduced in the latest iteration.</li>
+</ul>
+
+<h2>9. Guardrailed LLM Communication & Graceful Degradation</h2>
+<p>
+The application utilizes an LLM (Gemini 1.5 Flash) strictly for human communication drafting, governed by four fail-safe guardrails:
+</p>
+<ol>
+  <li><strong>Data Isolation:</strong> Internal risk labels, watchlist match reasons, and internal security notes are completely excluded from the payload supplied to the model.</li>
+  <li><strong>Forbidden Keyword Sanitizer:</strong> Model responses are scanned for sensitive terms (<code>watchlist</code>, <code>fraud</code>, <code>suspicious</code>, <code>sanction</code>, <code>mule</code>, <code>risk score</code>, <code>compromise</code>). If detected, the response is rejected.</li>
+  <li><strong>Account Number Redaction:</strong> Prevents disclosure of unmasked account numbers in outbound text.</li>
+  <li><strong>Deterministic Template Fallback:</strong> If the API key is absent, the model encounters a network error, rate limit, or fails output sanitization, the pipeline falls back seamlessly to deterministic, polite email templates. <strong>The core workflow never crashes.</strong></li>
+</ol>
+
+<h2>10. Production Roadmap & System Boundaries</h2>
+<p>
+A transparent evaluation acknowledges current prototype boundaries and defines the path to enterprise production:
+</p>
+<ul>
+  <li><strong>Live Government Registries:</strong> Currently validates mathematical checksums and prefix tables. Production would connect to live API endpoints: GSTN (India), IRS TIN Matching (US), VIES (EU), and ACRA (Singapore).</li>
+  <li><strong>Confirmation of Payee / Penny Drop:</strong> Account ownership is validated via algorithmic entity resolution. Production would integrate real-time penny-drop verification (RazorpayX, Cashfree) or Confirmation-of-Payee (UK/EU).</li>
+  <li><strong>Document Understanding:</strong> Currently tracks document presence via checklists. Next iteration incorporates an OCR/vision pipeline to extract text from tax certificates and compare directly with submitted form values.</li>
+  <li><strong>Durable Infrastructure:</strong> SQLite ephemeral store on Community Cloud would transition to PostgreSQL/Supabase with audit logging and Webhook dispatch to ERPs (NetSuite, SAP, Workday).</li>
+</ul>
+
+<div style="margin-top: 24px; border-top: 1px solid #cbd5e1; padding-top: 10px; font-size: 8.5pt; color: #64748b; display: flex; justify-content: space-between;">
+  <span>Live Application: <a href="https://jayaprakashzamp.streamlit.app/" style="color:#ea580c; text-decoration:none;">jayaprakashzamp.streamlit.app</a></span>
+  <span>Source Code: <a href="https://github.com/Dhanekulajayaprakash/zamp" style="color:#ea580c; text-decoration:none;">github.com/Dhanekulajayaprakash/zamp</a></span>
+  <span>Zamp AI Solutions Analyst Case Study</span>
+</div>
+
+</body>
+</html>
