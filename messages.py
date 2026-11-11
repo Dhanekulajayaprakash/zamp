@@ -12,7 +12,7 @@ import json
 import os
 import re
 
-MODEL = os.environ.get("VENDOR_LLM_MODEL", "gemini-2.0-flash")
+MODEL = os.environ.get("VENDOR_LLM_MODEL", "gemini-2.0-flash-lite")
 FORBIDDEN = ["watchlist", "blocklist", "fraud", "suspicious", "sanction", "debar", "mule", "risk score", "compromise"]
 COMPANY = "Acme Procurement"  # the (fictional) buyer
 
