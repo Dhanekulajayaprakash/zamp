@@ -19,13 +19,15 @@ COMPANY = "Acme Procurement"  # the (fictional) buyer
 
 def _api_key():
     key = os.environ.get("GEMINI_API_KEY")
-    if key:
-        return key
-    try:
-        import streamlit as st
-        return st.secrets.get("GEMINI_API_KEY")
-    except Exception:
-        return None
+    if not key:
+        try:
+            import streamlit as st
+            key = st.secrets.get("GEMINI_API_KEY")
+        except Exception:
+            return None
+    if isinstance(key, str):
+        key = key.strip().strip('"').strip("'")
+    return key or None
 
 
 def _facts(sub, decision):
@@ -97,11 +99,13 @@ def _llm(facts):
         "mode=request_info: list each request as a numbered item, and if resolved_since_last_time is non-empty, thank them "
         "for those. Under 150 words. Reply as: first line 'Subject: ...', blank line, then the body."
     )
-    models_to_try = [MODEL, "gemini-3.8-flash", "gemini-3.5-flash-lite"]
+    models_to_try = [MODEL, "gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash-lite"]
     response = None
+    used_model = MODEL
+    last_err = None
     for m_name in dict.fromkeys(models_to_try):
         try:
-            response = client.models.generate_content(
+            res = client.models.generate_content(
                 model=m_name,
                 contents=json.dumps(facts),
                 config=genai.types.GenerateContentConfig(
@@ -110,24 +114,33 @@ def _llm(facts):
                     temperature=0.3,
                 ),
             )
-            if response and response.text:
+            if res and res.text:
+                response = res
+                used_model = m_name
                 break
-        except Exception:
+        except Exception as e:
+            last_err = e
             continue
     if not response or not response.text:
-        return None
+        if last_err is not None:
+            raise last_err
+        raise ValueError("Empty LLM response")
     text = response.text.strip()
-    m = re.match(r"Subject:\s*(.+?)\n+(.*)", text, re.S)
+    text = re.sub(r"^```[a-zA-Z]*\s*|\s*```$", "", text).strip()
+    m = re.search(r"(?:^|\n)\*{0,2}Subject:\*{0,2}\s*(.+?)\r?\n+(.*)", text, re.S | re.I)
     if not m:
-        return None
-    return m.group(1).strip(), m.group(2).strip()
+        raise ValueError("LLM format mismatch (missing Subject line)")
+    subj = m.group(1).strip().strip("*").strip()
+    body = m.group(2).strip()
+    return subj, body, used_model
 
 
 def _safe(body, subj, sub, facts):
     low = (subj + " " + body).lower()
     if any(w in low for w in FORBIDDEN):
         return False
-    if sub.get("account_number") and sub["account_number"] in body:
+    acct = (sub.get("account_number") or "").strip()
+    if len(acct) >= 4 and acct in body:
         return False
     if facts["mode"] == "request_info" and len(body.split()) < 20:
         return False
@@ -139,14 +152,18 @@ def draft_email(sub, decision):
     by, subject, body = "template", None, None
     try:
         out = _llm(facts)
-        if out and _safe(out[1], out[0], sub, facts):
-            subject, body = out
-            by = f"LLM ({MODEL})"
+        if out is not None:
+            cand_subj, cand_body, used_model = out
+            if _safe(cand_body, cand_subj, sub, facts):
+                subject, body = cand_subj, cand_body
+                by = f"LLM ({used_model})"
+            else:
+                by = "template (LLM output failed safety check)"
     except Exception as e:  # network, quota, bad key - never break the pipeline
-        by = f"template (LLM unavailable: {type(e).__name__})"
+        code = getattr(e, "code", None) or getattr(e, "status_code", None)
+        suffix = f" {code}" if code else ""
+        by = f"template (LLM unavailable: {type(e).__name__}{suffix})"
     if subject is None:
         subject, body = _template(facts)
-        if by == "template" and _api_key():
-            by = "template (LLM output failed safety check)"
     return {"to": decision["email_to"], "to_note": decision.get("email_to_note", ""),
             "subject": subject, "body": body, "drafted_by": by, "mode": facts["mode"]}
