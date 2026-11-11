@@ -12,7 +12,7 @@ import json
 import os
 import re
 
-MODEL = os.environ.get("VENDOR_LLM_MODEL", "gemini-1.5-flash")
+MODEL = os.environ.get("VENDOR_LLM_MODEL", "gemini-3.5-flash-lite")
 FORBIDDEN = ["watchlist", "blocklist", "fraud", "suspicious", "sanction", "debar", "mule", "risk score", "compromise"]
 COMPANY = "Acme Procurement"  # the (fictional) buyer
 
@@ -97,15 +97,25 @@ def _llm(facts):
         "mode=request_info: list each request as a numbered item, and if resolved_since_last_time is non-empty, thank them "
         "for those. Under 150 words. Reply as: first line 'Subject: ...', blank line, then the body."
     )
-    response = client.models.generate_content(
-        model=MODEL,
-        contents=json.dumps(facts),
-        config=genai.types.GenerateContentConfig(
-            system_instruction=system,
-            max_output_tokens=500,
-            temperature=0.3,
-        ),
-    )
+    models_to_try = [MODEL, "gemini-3.8-flash", "gemini-3.5-flash-lite"]
+    response = None
+    for m_name in dict.fromkeys(models_to_try):
+        try:
+            response = client.models.generate_content(
+                model=m_name,
+                contents=json.dumps(facts),
+                config=genai.types.GenerateContentConfig(
+                    system_instruction=system,
+                    max_output_tokens=500,
+                    temperature=0.3,
+                ),
+            )
+            if response and response.text:
+                break
+        except Exception:
+            continue
+    if not response or not response.text:
+        return None
     text = response.text.strip()
     m = re.match(r"Subject:\s*(.+?)\n+(.*)", text, re.S)
     if not m:
