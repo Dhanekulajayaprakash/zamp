@@ -25,7 +25,7 @@ from validators import COUNTRY_NAMES
 
 st.set_page_config(
     page_title="Zamp AP | Vendor Onboarding Intelligence",
-    page_icon="⚡",
+    page_icon="Z",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -33,11 +33,10 @@ st.set_page_config(
 # ----------------- Orange & Black Custom Styling -----------------
 st.markdown(
     """<style>
-    /* Dark & Orange Theme Overrides */
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap');
     
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
     code, pre {
@@ -46,15 +45,15 @@ st.markdown(
 
     .block-container {
         padding-top: 1.8rem;
-        max-width: 1250px;
+        max-width: 1280px;
     }
 
-    /* Gradient Header Accent */
+    /* Brand Header */
     .brand-header {
         background: linear-gradient(135deg, #ff5500 0%, #ff8c00 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.2rem;
+        font-size: 2rem;
         font-weight: 800;
         letter-spacing: -0.5px;
         margin-bottom: 0.2rem;
@@ -62,7 +61,7 @@ st.markdown(
     
     .brand-sub {
         color: #94a3b8;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         margin-bottom: 1.5rem;
     }
 
@@ -70,7 +69,7 @@ st.markdown(
     .dark-card {
         background: #141820;
         border: 1px solid #232936;
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 16px 20px;
         margin-bottom: 12px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
@@ -81,12 +80,12 @@ st.markdown(
         transition: border-color 0.2s ease-in-out;
     }
 
-    /* Orange Glowing Pills */
+    /* Status Pills */
     .pill {
         display: inline-block;
         padding: 4px 12px;
         border-radius: 9999px;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.6px;
@@ -117,7 +116,7 @@ st.markdown(
     }
     .risk-bar-bg {
         width: 100%;
-        height: 12px;
+        height: 10px;
         background: #232938;
         border-radius: 6px;
         overflow: hidden;
@@ -128,20 +127,12 @@ st.markdown(
         border-radius: 6px;
         transition: width 0.6s ease;
     }
-    .risk-Low {
-        background: linear-gradient(90deg, #10b981, #34d399);
-    }
-    .risk-Medium {
-        background: linear-gradient(90deg, #f59e0b, #fbbf24);
-    }
-    .risk-High {
-        background: linear-gradient(90deg, #f97316, #ea580c);
-    }
-    .risk-Critical {
-        background: linear-gradient(90deg, #ef4444, #dc2626);
-    }
+    .risk-Low    { background: linear-gradient(90deg, #10b981, #34d399); }
+    .risk-Medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .risk-High   { background: linear-gradient(90deg, #f97316, #ea580c); }
+    .risk-Critical { background: linear-gradient(90deg, #ef4444, #dc2626); }
 
-    /* Metric cards orange accent */
+    /* Metric cards */
     div[data-testid="stMetricValue"] {
         color: #ff8533 !important;
         font-weight: 700 !important;
@@ -151,26 +142,63 @@ st.markdown(
         font-weight: 600;
     }
 
-    /* Sidebar header styling */
-    .sidebar-badge {
-        background: linear-gradient(135deg, #261608 0%, #151821 100%);
-        border: 1px solid #ff6600;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 14px;
+    /* Sidebar */
+    .sidebar-brand {
+        padding: 10px 0 8px 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #232a3a;
+    }
+    .sidebar-section-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin: 0 0 8px 0;
+    }
+    .arch-box {
+        background: #0e1118;
+        border: 1px solid #1e2636;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        font-size: 0.78rem;
+        color: #cbd5e1;
+        line-height: 1.55;
+    }
+    .arch-box strong { color: #ff9955; }
+    .vendor-card {
+        background: #11151e;
+        border: 1px solid #1e2636;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin: 4px 0;
+        font-size: 0.78rem;
     }
 
-    /* Form submit button bright orange */
+    /* Section headers in form */
+    .form-section-label {
+        color: #ff8800;
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.3px;
+        padding: 10px 0 2px 0;
+        border-bottom: 1px solid #1e2533;
+        margin-bottom: 4px;
+    }
+
+    /* Primary button */
     div.stButton > button:first-child[kind="primary"] {
         background: linear-gradient(135deg, #ff5500 0%, #ff8800 100%) !important;
         color: #ffffff !important;
         border: none !important;
         font-weight: 700 !important;
-        box-shadow: 0 4px 15px rgba(255, 85, 0, 0.4) !important;
+        letter-spacing: 0.3px;
+        box-shadow: 0 4px 15px rgba(255, 85, 0, 0.35) !important;
     }
     div.stButton > button:first-child[kind="primary"]:hover {
         background: linear-gradient(135deg, #ff6600 0%, #ffa020 100%) !important;
-        box-shadow: 0 6px 20px rgba(255, 102, 0, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(255, 102, 0, 0.55) !important;
     }
     </style>""",
     unsafe_allow_html=True,
@@ -231,7 +259,7 @@ st.session_state.setdefault("animate", False)
 
 # ------------------------------------------------------------------ UI Renderers
 def render_risk_gauge(score: int, label: str):
-    """Render modern glowing cyber-risk progress bar."""
+    """Render modern risk progress bar."""
     colors = {
         "Low": "#10b981",
         "Medium": "#f59e0b",
@@ -243,22 +271,22 @@ def render_risk_gauge(score: int, label: str):
         f"""
         <div class="risk-container">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:0.85rem; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">
-                    🛡️ Composite Risk Analysis
+                <span style="font-size:0.82rem; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">
+                    Composite Risk Score
                 </span>
-                <span style="color:{fill_color}; font-weight:800; font-size:1.05rem;">
-                    {label.upper()} ({score}/100)
+                <span style="color:{fill_color}; font-weight:800; font-size:1rem;">
+                    {label.upper()} &nbsp; {score}/100
                 </span>
             </div>
             <div class="risk-bar-bg">
                 <div class="risk-bar-fill risk-{label}" style="width: {max(score, 4)}%;"></div>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.75rem; color:#64748b;">
-                <span>0 (Clean)</span>
-                <span>25 (Guarded)</span>
-                <span>50 (Elevated)</span>
-                <span>75 (High)</span>
-                <span>100 (Hard Reject)</span>
+            <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.72rem; color:#64748b;">
+                <span>0 Clean</span>
+                <span>25 Guarded</span>
+                <span>50 Elevated</span>
+                <span>75 High</span>
+                <span>100 Reject</span>
             </div>
         </div>
         """,
@@ -270,15 +298,15 @@ def render_stage(stage: dict, container):
     with container.container(border=True):
         st.markdown(
             f"**{ICON[stage['status']]} {stage['title']}** &nbsp; "
-            f"<span style='color:#ff8800; font-family:monospace; font-size:0.78rem; background:#221508; padding:2px 6px; border-radius:4px;'>{stage['ms']} ms</span>",
+            f"<span style='color:#ff8800; font-family:monospace; font-size:0.76rem; background:#1a1208; padding:2px 6px; border-radius:4px;'>{stage['ms']} ms</span>",
             unsafe_allow_html=True
         )
         for c in stage["checks"]:
             tag = EFFECT_TAG[c["effect"]]
-            tag_badge = f" &nbsp;<span style='background:#2a1b14; color:#ff944d; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>{tag}</span>" if tag else ""
+            tag_badge = f" &nbsp;<span style='background:#1e1208; color:#ff9966; padding:2px 7px; border-radius:4px; font-size:0.73rem;'>{tag}</span>" if tag else ""
             st.markdown(
                 f"{ICON[c['status']]} **{c['rule']}**{tag_badge}  \n"
-                f"<span style='color:#94a3b8; font-size:0.88rem;'>{c['detail']}</span>",
+                f"<span style='color:#94a3b8; font-size:0.86rem;'>{c['detail']}</span>",
                 unsafe_allow_html=True
             )
 
@@ -294,7 +322,7 @@ def render_decision(d: dict):
                 <h3 style="margin:0; font-weight:800; color:#f8fafc;">Verification Result</h3>
                 {pill_html}
             </div>
-            <p style="margin: 8px 0 0 0; color:#cbd5e1; font-size:1rem;">{d['headline']}</p>
+            <p style="margin: 8px 0 0 0; color:#cbd5e1; font-size:0.98rem;">{d['headline']}</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -308,17 +336,17 @@ def render_decision(d: dict):
 
     render_risk_gauge(d.get("risk_score", 0), d.get("risk_label", "Low"))
 
-    st.markdown(f"**Action Item / Next Step:** `{d['next_step']}`")
+    st.markdown(f"**Next Step:** `{d['next_step']}`")
     
     if "resolved" in d:
-        st.markdown("#### 🔄 Delta Analysis vs Previous Submission")
+        st.markdown("#### Delta Analysis — Previous Submission")
         a, b, c = st.columns(3)
         a.markdown("✅ **Resolved**\n\n" + ("\n".join(f"- {x}" for x in d["resolved"]) or "- none"))
-        b.markdown("⏳ **Still Open**\n\n" + ("\n".join(f"- {x}" for x in d["still_open"]) or "- none"))
-        c.markdown("🆕 **New Anomalies**\n\n" + ("\n".join(f"- {x}" for x in d["new_issues"]) or "- none"))
+        b.markdown("⚠️ **Still Open**\n\n" + ("\n".join(f"- {x}" for x in d["still_open"]) or "- none"))
+        c.markdown("❌ **New Anomalies**\n\n" + ("\n".join(f"- {x}" for x in d["new_issues"]) or "- none"))
         
     if d["reasons"]:
-        st.markdown("#### 🔍 Rule Trigger Breakdown")
+        st.markdown("#### Rule Trigger Breakdown")
         for r in d["reasons"]:
             st.markdown(f"- `{EFFECT_TAG[r['effect']]}` **{r['rule']}** — {r['detail']}")
 
@@ -328,7 +356,7 @@ def render_email(e: dict | None):
         return
     with st.container(border=True):
         st.markdown(
-            f"**✉️ Automated Vendor Dispatch** &nbsp; "
+            f"**Automated Vendor Dispatch** &nbsp; "
             f"<span style='background:#1b2333; color:#60a5fa; padding:2px 8px; border-radius:4px; font-size:0.75rem;'>engine: {e['drafted_by']}</span>",
             unsafe_allow_html=True
         )
@@ -341,77 +369,73 @@ def render_email(e: dict | None):
 def render_run(run: dict, animate: bool):
     sub, res = run["submission"], run["result"]
     st.markdown(f"### {run['legal_name']} &nbsp;·&nbsp; `{COUNTRY_NAMES.get(run['country'], run['country'])}`")
-    st.caption(f"Run ID #{run['id']} · Timestamp: {run['created_at']} UTC · Latency: {run['duration_ms']:.1f}ms")
+    st.caption(f"Run #{run['id']} · {run['created_at']} UTC · {run['duration_ms']:.1f} ms")
     
     for stg in res["stages"]:
         slot = st.empty()
         if animate:
-            slot.info(f"⚡ Processing {stg['title']} ...")
+            slot.info(f"Processing {stg['title']} ...")
             time.sleep(0.4)
         render_stage(stg, slot)
     if animate:
         time.sleep(0.2)
     render_decision(res["decision"])
     render_email(run["email"])
-    with st.expander("📄 View Normalized Payload (JSON)"):
+    with st.expander("View Normalized Payload (JSON)"):
         st.json(sub)
 
 
 # ------------------------------------------------------------------ Sidebar
 with st.sidebar:
+    # Brand
     st.markdown("""
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-            <span style="font-size:2rem;">⚡</span>
-            <div>
-                <h2 style="margin:0; font-size:1.3rem; font-weight:800; color:#ff7700;">ZAMP AP</h2>
-                <span style="font-size:0.78rem; color:#94a3b8; font-weight:600;">Autonomous Vendor Verification</span>
-            </div>
+        <div class="sidebar-brand">
+            <div style="font-size:1.35rem; font-weight:800; color:#ff7700; letter-spacing:-0.3px;">ZAMP AP</div>
+            <div style="font-size:0.76rem; color:#64748b; font-weight:500; margin-top:2px;">Autonomous Vendor Verification</div>
         </div>
     """, unsafe_allow_html=True)
-    
-    # Architecture Info Box
+
+    # Architecture Info
     st.markdown("""
-        <div class="sidebar-badge">
-            <div style="font-weight:700; color:#ff8800; font-size:0.85rem; margin-bottom:4px;">🏗️ ARCHITECTURE PRINCIPLE</div>
-            <div style="font-size:0.78rem; color:#cbd5e1; line-height:1.4;">
-                • <strong>Deterministic Rules Engine:</strong> Validates format, checksums, bank code prefixes & entity identity.<br>
-                • <strong>Semantic Cross-Matching:</strong> Entity name suffix fuzzy match, postal format & look-alike domain checks.<br>
-                • <strong>Guardrailed LLM:</strong> Generates polite vendor email without leaking internal fraud flags.
-            </div>
+        <div class="arch-box">
+            <div style="font-weight:700; color:#ff9955; font-size:0.78rem; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Architecture</div>
+            <strong>Deterministic Rules:</strong> Validates format, checksums, bank code prefixes &amp; entity identity.<br><br>
+            <strong>Semantic Cross-Match:</strong> Entity name suffix fuzzy match, postal format &amp; look-alike domain checks.<br><br>
+            <strong>Guardrailed LLM:</strong> Generates polite vendor email without leaking internal fraud flags.
         </div>
     """, unsafe_allow_html=True)
 
     if _api_key():
-        st.success(f"🤖 LLM Drafting: Active ({MODEL})")
+        st.success(f"LLM Active — {MODEL}")
     else:
-        st.info("⚡ LLM Mode: Template Fallback (key-optional)")
+        st.info("LLM Unavailable — Template fallback")
 
     st.divider()
 
-    # Reset / reload demo history
+    # Buttons
     c_btn1, c_btn2 = st.columns(2)
     with c_btn1:
-        if st.button("🔄 Reload Demo", use_container_width=True):
+        if st.button("Reload Demo", use_container_width=True):
             db.clear()
             ensure_seeded_data()
             st.session_state.last_run_id = None
             st.rerun()
     with c_btn2:
-        if st.button("🗑️ Clear DB", use_container_width=True):
+        if st.button("Clear DB", use_container_width=True):
             db.clear()
             st.session_state.last_run_id = None
             st.rerun()
 
-    st.markdown(f"**Database Runs Stored:** `{db.count()}`")
+    st.caption(f"Stored runs: **{db.count()}**")
 
-    # Master vendor database on file
+    # Vendor Registry
     st.divider()
-    st.markdown("<span style='font-size:0.85rem; font-weight:700; color:#94a3b8;'>📋 EXISTING ERP VENDORS ON FILE</span>", unsafe_allow_html=True)
+    st.markdown("<p class='sidebar-section-label'>ERP Vendors on File</p>", unsafe_allow_html=True)
     for v in REGISTRY:
         st.markdown(
-            f"""<div style="background:#11151e; border:1px solid #1e2636; border-radius:6px; padding:6px 10px; margin:4px 0; font-size:0.78rem;">
+            f"""<div class="vendor-card">
                 <strong style="color:#ff8800;">{v['id']}</strong> &nbsp;{v['name']}<br>
-                <span style="color:#64748b;">{v['country']} · {v['tax_id']} · Contact: {v['contact_email']}</span>
+                <span style="color:#64748b;">{v['country']} · {v['tax_id']} · {v['contact_email']}</span>
             </div>""",
             unsafe_allow_html=True
         )
@@ -419,31 +443,31 @@ with st.sidebar:
 
 # ------------------------------------------------------------------ Tabs
 st.markdown('<div class="brand-header">Vendor Onboarding Intelligence</div>', unsafe_allow_html=True)
-st.markdown('<div class="brand-sub">Real-time cross-validation pipeline with checksum validation, bank registry resolution & risk decisioning.</div>', unsafe_allow_html=True)
+st.markdown('<div class="brand-sub">Real-time cross-validation · Checksum verification · Bank registry resolution · Risk decisioning</div>', unsafe_allow_html=True)
 
-tab_run, tab_dash, tab_design = st.tabs(["⚡ Intake & Verification Run", "📊 Executive Audit Dashboard", "📐 System Logic & Specs"])
+tab_run, tab_dash, tab_design = st.tabs(["Intake & Verification", "Executive Dashboard", "System Architecture"])
 
 
 # ------------------------------------------------------------------ Tab 1: Run
 with tab_run:
     left, right = st.columns([2, 3], gap="large")
     with left:
-        st.markdown("#### 1. Select or Input Vendor Payload")
-        labels = {"blank": "— [Blank Custom Form] —"} | {s["key"]: f"[{s['kind']}] {s['label']}" for s in SCENARIOS}
-        st.selectbox("Select Pre-configured Scenario", list(labels), format_func=labels.get, key="scenario_pick")
+        st.markdown("#### Select or Input Vendor Payload")
+        labels = {"blank": "— Blank Custom Form —"} | {s["key"]: f"[{s['kind']}] {s['label']}" for s in SCENARIOS}
+        st.selectbox("Pre-configured Scenario", list(labels), format_func=labels.get, key="scenario_pick")
         
         c_load1, c_load2 = st.columns([2, 1])
         with c_load1:
-            st.button("📥 Load Selected Payload into Form", on_click=load_scenario, use_container_width=True)
+            st.button("Load Payload into Form", on_click=load_scenario, use_container_width=True)
         with c_load2:
-            st.caption("Auto-fills form fields")
+            st.caption("Auto-fills fields")
 
         pick = st.session_state.scenario_pick
         if pick != "blank":
-            st.info(f"💡 **Scenario Context:** {SCENARIOS_BY_KEY[pick]['description']}")
+            st.info(f"**Scenario:** {SCENARIOS_BY_KEY[pick]['description']}")
 
         with st.form("vendor_form"):
-            st.markdown("<span style='color:#ff8800; font-weight:700; font-size:0.9rem;'>🏢 COMPANY REGISTRATION</span>", unsafe_allow_html=True)
+            st.markdown("<div class='form-section-label'>Company Registration</div>", unsafe_allow_html=True)
             st.text_input("Legal Business Name", key="f_legal_name")
             c1, c2 = st.columns(2)
             c1.selectbox("Country of Incorporation", COUNTRIES, format_func=lambda c: f"{c} - {COUNTRY_NAMES[c]}", key="f_country")
@@ -454,7 +478,7 @@ with tab_run:
             c1.text_input("Authorized Contact Person", key="f_contact_name")
             c2.text_input("Contact Email Address", key="f_contact_email")
 
-            st.markdown("<span style='color:#ff8800; font-weight:700; font-size:0.9rem;'>🏦 BANK ACCOUNT & SETTLEMENT</span>", unsafe_allow_html=True)
+            st.markdown("<div class='form-section-label'>Bank Account & Settlement</div>", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
             c1.selectbox("Bank Jurisdiction", COUNTRIES, format_func=lambda c: f"{c} - {COUNTRY_NAMES[c]}", key="f_bank_country")
             c2.text_input("Bank Name", key="f_bank_name")
@@ -464,16 +488,15 @@ with tab_run:
             c1.text_input("Account Number / IBAN", key="f_account_number")
             c2.text_input("Bank Code (IFSC / ABA / Sort / BIC)", key="f_bank_code")
 
-            st.markdown("<span style='color:#ff8800; font-weight:700; font-size:0.9rem;'>📎 COMPLIANCE ATTACHMENTS</span>", unsafe_allow_html=True)
+            st.markdown("<div class='form-section-label'>Compliance Attachments</div>", unsafe_allow_html=True)
             st.multiselect("Uploaded Documents", ALL_DOCS, format_func=DOC_LABELS.get, key="f_documents")
 
-            submitted = st.form_submit_button("⚡ Run Autonomous Verification", type="primary", use_container_width=True)
+            submitted = st.form_submit_button("Run Autonomous Verification", type="primary", use_container_width=True)
 
         if submitted:
             sub = {f: st.session_state[f"f_{f}"] for f in FIELDS}
             scen = st.session_state.loaded_scenario
             
-            # Ensure prior attempt exists for resubmission diffing
             if scen and SCENARIOS_BY_KEY[scen].get("previous_scenario"):
                 prev_sub = SCENARIOS_BY_KEY[SCENARIOS_BY_KEY[scen]["previous_scenario"]]["submission"]
                 if not db.latest_run_for(prev_sub["legal_name"], prev_sub["country"]):
@@ -489,13 +512,12 @@ with tab_run:
             st.session_state.animate = False
             render_run(run, animate)
         else:
-            st.markdown("#### 2. Live Verification Pipeline Stream")
+            st.markdown("#### Live Verification Pipeline")
             st.markdown("""
-                <div style="border: 2px dashed #232a3b; border-radius:12px; padding:40px; text-align:center; background:#10131a;">
-                    <span style="font-size:2.5rem;">⚡</span>
-                    <h4 style="color:#f8fafc; margin:10px 0 6px 0;">Pipeline Ready</h4>
-                    <p style="color:#64748b; font-size:0.9rem; max-width:400px; margin:0 auto;">
-                        Select a test scenario on the left and click <strong>Run Autonomous Verification</strong> to observe each verification gate execute live.
+                <div style="border: 2px dashed #232a3b; border-radius:12px; padding:50px 40px; text-align:center; background:#0d1017;">
+                    <div style="font-size:1.6rem; font-weight:800; color:#ff7700; letter-spacing:-0.5px; margin-bottom:8px;">Pipeline Ready</div>
+                    <p style="color:#64748b; font-size:0.9rem; max-width:380px; margin:0 auto; line-height:1.6;">
+                        Select a test scenario on the left and click <strong style="color:#cbd5e1;">Run Autonomous Verification</strong> to observe each verification gate execute live.
                     </p>
                 </div>
             """, unsafe_allow_html=True)
@@ -511,12 +533,11 @@ with tab_dash:
         total = len(df)
         n = df["status"].value_counts()
 
-        # Top Executive Metrics
         k1, k2, k3, k4, k5 = st.columns(5)
         k1.metric("Total Ingestions", total)
-        k2.metric("🟢 Approved", f"{int(n.get('APPROVED', 0))} ({(n.get('APPROVED', 0)/total)*100:.0f}%)")
-        k3.metric("🟠 Pending / Manual", f"{int(n.get('PENDING', 0))} ({(n.get('PENDING', 0)/total)*100:.0f}%)")
-        k4.metric("🔴 Blocked / Reject", f"{int(n.get('REJECTED', 0))} ({(n.get('REJECTED', 0)/total)*100:.0f}%)")
+        k2.metric("Approved", f"{int(n.get('APPROVED', 0))} ({(n.get('APPROVED', 0)/total)*100:.0f}%)")
+        k3.metric("Pending / Manual", f"{int(n.get('PENDING', 0))} ({(n.get('PENDING', 0)/total)*100:.0f}%)")
+        k4.metric("Blocked / Rejected", f"{int(n.get('REJECTED', 0))} ({(n.get('REJECTED', 0)/total)*100:.0f}%)")
         k5.metric("Avg Latency", f"{df['duration_ms'].mean():.1f} ms")
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -540,8 +561,8 @@ with tab_dash:
 
         st.markdown("### Historical Audit Trail")
         f1, f2 = st.columns([1, 2])
-        status_f = f1.multiselect("Filter Decision", ["APPROVED", "PENDING", "REJECTED"], default=["APPROVED", "PENDING", "REJECTED"])
-        q = f2.text_input("🔍 Search Vendor Name")
+        status_f = f1.multiselect("Filter by Decision", ["APPROVED", "PENDING", "REJECTED"], default=["APPROVED", "PENDING", "REJECTED"])
+        q = f2.text_input("Search Vendor Name")
 
         view = df[df["status"].isin(status_f)]
         if q:
@@ -565,16 +586,16 @@ with tab_dash:
         if sel:
             selected_id = int(table.iloc[sel[0]]["id"])
             st.divider()
-            st.markdown(f"#### 🔍 Deep Inspection for Run #{selected_id}")
+            st.markdown(f"#### Deep Inspection — Run #{selected_id}")
             render_run(db.get_run(selected_id), animate=False)
         else:
-            st.caption("💡 Tip: Click any row above to inspect the step-by-step audit reasoning and generated vendor email.")
+            st.caption("Click any row to inspect the step-by-step audit reasoning and generated vendor email.")
 
 
-# ------------------------------------------------------------------ Tab 3: Design
+# ------------------------------------------------------------------ Tab 3: Architecture
 with tab_design:
     st.markdown("""
-### 🧠 System Architecture & Decision Boundary
+### System Architecture & Decision Boundary
 
 ```
                      ┌────────────────────────────────┐
