@@ -3,11 +3,11 @@
 Pipeline (each stage yields a result the UI can animate):
   1. Intake & completeness
   2. Tax ID validation
-  3. Bank detail validation
+  3. Bank detail validation  (+ bank name lookup & cross-check)
   4. Payee name match (legal name vs. bank account holder)
-  5. Cross-field consistency
+  5. Cross-field consistency  (+ address postal code, email domain)
   6. Vendor registry & watchlist
-  7. Decision
+  7. Decision  (+ risk score)
 
 Every check has an `effect`:
   none   - informational / already covered elsewhere
@@ -22,7 +22,9 @@ import time
 from difflib import SequenceMatcher
 
 from data import ALL_DOCS, DOC_LABELS, REGISTRY, WATCHLIST
-from validators import COUNTRY_NAMES, TAX_VALIDATORS, bank_validate
+from validators import (COUNTRY_NAMES, TAX_VALIDATORS, bank_validate,
+                         lookup_bank_name, validate_address,
+                         validate_email_domain, extract_gstin_state)
 
 FIELD_LABELS = {
     "legal_name": "legal business name", "country": "country of registration", "tax_id": "tax ID",
@@ -138,7 +140,14 @@ def stage_tax(sub):
     label, fn = TAX_VALIDATORS[cc]
     ok, why = fn(t)
     if ok:
-        return [chk("tax_ok", f"{label} validity ({cc})", "pass", f"{t}: {why}.")]
+        out = [chk("tax_ok", f"{label} validity ({cc})", "pass", f"{t}: {why}.")]
+        # For Indian GSTIN, extract and show the state
+        if cc == "IN":
+            state = extract_gstin_state(t)
+            if state:
+                out.append(chk("gstin_state", "GSTIN state code", "pass",
+                               f"State code {t[:2]} → {state}. PAN embedded: {t[2:12]}."))
+        return out
     other_cc, other_label = detect_tax_country(t)
     if other_cc and other_cc != cc:
         return [chk("tax_format_other", f"{label} validity ({cc})", "fail",
@@ -155,7 +164,29 @@ def stage_bank(sub):
     if not supported:
         return [chk("bank_unsupported", "Bank detail format", "warn", why + "; needs manual verification.", "review")]
     if ok:
-        return [chk("bank_ok", f"Bank detail format ({sub['bank_country']})", "pass", why + ".")]
+        out = [chk("bank_ok", f"Bank detail format ({sub['bank_country']})", "pass", why + ".")]
+        # Bank name lookup and cross-check
+        country = sub["bank_country"]
+        found, resolved_name = lookup_bank_name(country, sub["bank_code"])
+        if found and resolved_name:
+            prefix = sub["bank_code"][:4]
+            prefix_labels = {"IN": f"IFSC prefix {prefix}", "US": f"Routing prefix {prefix}",
+                             "SG": f"SWIFT code {sub['bank_code']}"}
+            prefix_label = prefix_labels.get(country, f"Bank code {sub['bank_code']}")
+            out.append(chk("bank_name_resolved", "Bank name lookup", "pass",
+                           f"{prefix_label} → {resolved_name}."))
+            # Cross-check with vendor-provided bank_name
+            vendor_bank = (sub.get("bank_name") or "").strip()
+            if vendor_bank:
+                sim = SequenceMatcher(None, resolved_name.lower(), vendor_bank.lower()).ratio()
+                if sim >= 0.60:
+                    out.append(chk("bank_name_match", "Bank name cross-check", "pass",
+                                   f"Vendor said '{vendor_bank}', lookup says '{resolved_name}' (similarity {sim:.0%}). Consistent."))
+                else:
+                    out.append(chk("bank_name_mismatch", "Bank name cross-check", "warn",
+                                   f"Vendor said '{vendor_bank}' but code resolves to '{resolved_name}' (similarity {sim:.0%}). "
+                                   f"Possible wrong bank code or typo.", "review"))
+        return out
     return [chk("bank_invalid", f"Bank detail format ({sub['bank_country']})", "fail", why + ".", "fix",
                 f"The bank details did not pass our format checks: {why}. Please re-check and resend, with a bank letter or cancelled cheque.")]
 
@@ -184,6 +215,8 @@ def stage_name_match(sub):
 def stage_cross(sub):
     out = []
     cc, t = sub["country"], sub["tax_id"]
+
+    # Tax ID vs country
     if t and cc in TAX_VALIDATORS and not TAX_VALIDATORS[cc][1](t)[0]:
         other_cc, other_label = detect_tax_country(t)
         if other_cc and other_cc != cc:
@@ -195,6 +228,8 @@ def stage_cross(sub):
     elif t:
         out.append(chk("tax_country_ok", "Tax ID country vs. vendor country", "pass",
                        "Tax ID format is consistent with the declared country."))
+
+    # Bank country vs vendor country
     if sub["bank_country"] != cc:
         out.append(chk("bank_country_mismatch", "Bank country vs. vendor country", "warn",
                        f"Vendor is in {COUNTRY_NAMES.get(cc, cc)} but the bank account is in {COUNTRY_NAMES.get(sub['bank_country'], sub['bank_country'])}. "
@@ -203,10 +238,30 @@ def stage_cross(sub):
                                  "Please tell us why and attach supporting documents."))
     else:
         out.append(chk("bank_country_ok", "Bank country vs. vendor country", "pass", "Bank is in the same country as the vendor."))
-    d = domain(sub.get("contact_email", ""))
+
+    # Address postal code check
+    address = sub.get("address", "")
+    if address:
+        addr_ok, addr_why = validate_address(cc, address)
+        if addr_ok:
+            out.append(chk("address_postal_ok", "Address postal code", "pass", f"{addr_why} for {COUNTRY_NAMES.get(cc, cc)}."))
+        else:
+            out.append(chk("address_postal_missing", "Address postal code", "warn",
+                           f"{addr_why} for {COUNTRY_NAMES.get(cc, cc)}. Advisory - may need manual check.", "none"))
+
+    # Email domain vs company name
+    email = sub.get("contact_email", "")
+    d = domain(email)
     if d in FREE_MAIL:
         out.append(chk("free_mail", "Contact email domain", "warn",
                        f"Business contact uses a free mailbox ({d}). Advisory only.", "none"))
+    elif email:
+        match_type, match_detail = validate_email_domain(email, sub.get("legal_name", ""))
+        if match_type == "match":
+            out.append(chk("email_domain_match", "Email domain vs. company name", "pass", match_detail))
+        elif match_type == "no_match":
+            out.append(chk("email_domain_no_match", "Email domain vs. company name", "warn",
+                           f"{match_detail}. Could be legitimate (holding company, DBA), but worth verifying.", "none"))
     return out
 
 
@@ -264,6 +319,43 @@ STAGES = [
 ]
 
 
+# ---------------------------------------------------------------- risk score
+def _compute_risk(sub, checks):
+    score = 0
+    for c in checks:
+        if c["status"] == "pass":
+            continue
+        eff = c["effect"]
+        if eff == "block":
+            score += 40
+        elif eff == "review":
+            score += 20
+        elif eff == "fix":
+            score += 10
+        code = c["code"]
+        if code == "free_mail":
+            score += 5
+        if code == "bank_country_mismatch":
+            score += 15
+        if code == "bank_change":
+            score += 25
+        if code == "contact_domain_change":
+            score += 20
+        if code == "watchlist":
+            score += 50
+    return min(score, 100)
+
+
+def _risk_label(score: int) -> str:
+    if score <= 20:
+        return "Low"
+    elif score <= 45:
+        return "Medium"
+    elif score <= 70:
+        return "High"
+    return "Critical"
+
+
 # ---------------------------------------------------------------- decision
 def decide(sub, stages, previous=None):
     checks = [c for s in stages for c in s["checks"]]
@@ -298,13 +390,16 @@ def decide(sub, stages, previous=None):
 
     reasons = [c for c in blocks + reviews + fixes]
     codes = [c["code"] for c in reasons]
+    risk_score = _compute_risk(sub, checks)
+    risk_label = _risk_label(risk_score)
+
     d = {
         "status": status, "manual_review": bool(reviews or blocks), "headline": headline, "next_step": next_step,
         "reasons": reasons, "advisories": advisories, "issue_codes": codes,
         "matched_vendor": vendor["id"] if vendor else None,
         "n_checks": len(checks), "n_passed": sum(1 for c in checks if c["status"] == "pass"),
+        "risk_score": risk_score, "risk_label": risk_label,
     }
-    # who should hear from us? Never the submitter if the account may be compromised.
     if vendor and any(c in codes for c in ("bank_change", "contact_domain_change")):
         d["email_to"] = vendor["contact_email"]
         d["email_to_name"] = vendor["contact_name"]

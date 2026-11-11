@@ -1,4 +1,4 @@
-"""Pure validation helpers: tax IDs, bank details, IBAN/ABA/GSTIN checksums.
+"""Pure validation helpers: tax IDs, bank details, IBAN/ABA/GSTIN checksums, address patterns.
 
 Everything here is deterministic - no AI involved. Money-moving decisions should
 rest on rules you can audit; the LLM is only used later to draft the vendor email.
@@ -13,6 +13,110 @@ COUNTRY_NAMES = {
     "IN": "India", "US": "United States", "GB": "United Kingdom", "DE": "Germany",
     "SG": "Singapore", "AE": "United Arab Emirates", "FR": "France", "BR": "Brazil",
 }
+
+# --------- Bank directory: maps code prefixes → real bank names ----------
+BANK_DIRECTORY: dict[str, str] = {
+    # Indian IFSC prefixes (first 4 chars)
+    "SBIN": "State Bank of India", "HDFC": "HDFC Bank", "ICIC": "ICICI Bank",
+    "UTIB": "Axis Bank", "PUNB": "Punjab National Bank", "BARB": "Bank of Baroda",
+    "CNRB": "Canara Bank", "UBIN": "Union Bank of India", "IOBA": "Indian Overseas Bank",
+    "IDIB": "Indian Bank", "BKID": "Bank of India", "KKBK": "Kotak Mahindra Bank",
+    "YESB": "Yes Bank", "INDB": "IndusInd Bank", "FDRL": "Federal Bank",
+    "SIBL": "South Indian Bank", "KARB": "Karnataka Bank", "CBIN": "Central Bank of India",
+    "ALLA": "Allahabad Bank", "MAHB": "Bank of Maharashtra",
+    # US ABA routing prefixes (first 4 digits)
+    "0210": "JPMorgan Chase", "0260": "Bank of America", "0710": "Wells Fargo",
+    "1210": "Wells Fargo", "0740": "PNC Bank", "0440": "HSBC",
+    "0312": "TD Bank", "0360": "KeyBank", "0611": "US Bank", "0531": "Truist Bank",
+    # SWIFT/BIC codes (Singapore)
+    "DBSSSGSG": "DBS Bank (Singapore)", "OCBCSGSG": "OCBC Bank (Singapore)",
+    "UOVBSGSG": "UOB (Singapore)",
+    # SWIFT/BIC codes (Germany)
+    "INGDDEFF": "ING Bank (Germany)", "COBADEFF": "Commerzbank (Germany)",
+    "DEUTDEFF": "Deutsche Bank (Germany)",
+    # SWIFT/BIC codes (UK)
+    "BARCGB22": "Barclays (UK)", "NWBKGB2L": "NatWest (UK)",
+    "LOYDGB2L": "Lloyds (UK)", "HSBCGB2L": "HSBC (UK)",
+}
+
+# --------- Postal / ZIP code patterns by country ----------
+POSTAL_PATTERNS = {
+    "IN": (r"\d{6}", "6-digit PIN code"),
+    "US": (r"\d{5}(-\d{4})?", "5-digit ZIP (or ZIP+4)"),
+    "GB": (r"[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}", "UK postcode"),
+    "DE": (r"\d{5}", "5-digit PLZ"),
+    "SG": (r"\d{6}", "6-digit postal code"),
+    "FR": (r"\d{5}", "5-digit code postal"),
+    "BR": (r"\d{5}-?\d{3}", "8-digit CEP"),
+}
+
+# --------- Indian state codes in GSTIN ----------
+GSTIN_STATES = {
+    "01": "Jammu & Kashmir", "02": "Himachal Pradesh", "03": "Punjab", "04": "Chandigarh",
+    "05": "Uttarakhand", "06": "Haryana", "07": "Delhi", "08": "Rajasthan",
+    "09": "Uttar Pradesh", "10": "Bihar", "11": "Sikkim", "12": "Arunachal Pradesh",
+    "13": "Nagaland", "14": "Manipur", "15": "Mizoram", "16": "Tripura",
+    "17": "Meghalaya", "18": "Assam", "19": "West Bengal", "20": "Jharkhand",
+    "21": "Odisha", "22": "Chhattisgarh", "23": "Madhya Pradesh", "24": "Gujarat",
+    "26": "Dadra & Nagar Haveli", "27": "Maharashtra", "29": "Karnataka",
+    "30": "Goa", "31": "Lakshadweep", "32": "Kerala", "33": "Tamil Nadu",
+    "34": "Puducherry", "35": "Andaman & Nicobar", "36": "Telangana",
+    "37": "Andhra Pradesh", "38": "Ladakh",
+}
+
+
+def lookup_bank_name(country: str, bank_code: str) -> tuple[bool, str | None]:
+    """Resolve a bank name from bank_code using BANK_DIRECTORY."""
+    if not bank_code:
+        return False, None
+    code = bank_code.strip().upper()
+    if country in ("IN", "US"):
+        prefix = code[:4]
+        name = BANK_DIRECTORY.get(prefix)
+        return (True, name) if name else (False, None)
+    # For other countries try full code, then without trailing "XXX"
+    name = BANK_DIRECTORY.get(code)
+    if name:
+        return True, name
+    if len(code) > 3 and code.endswith("XXX"):
+        name = BANK_DIRECTORY.get(code[:-3])
+        if name:
+            return True, name
+    return False, None
+
+
+def validate_address(country: str, address: str) -> tuple[bool, str]:
+    """Check if address contains a postal/ZIP code matching the country pattern."""
+    if not address:
+        return False, "Address is empty"
+    if country in POSTAL_PATTERNS:
+        pattern, label = POSTAL_PATTERNS[country]
+        if re.search(pattern, address.upper() if country == "GB" else address):
+            return True, f"Contains a valid {label}"
+        return False, f"No {label} found in the address"
+    return True, "No postal code pattern check available for this country"
+
+
+def extract_gstin_state(gstin: str) -> str | None:
+    """Extract state name from a valid GSTIN."""
+    if len(gstin) >= 2:
+        return GSTIN_STATES.get(gstin[:2])
+    return None
+
+
+def validate_email_domain(email: str, legal_name: str) -> tuple[str, str]:
+    """Check if email domain looks consistent with company name."""
+    if "@" not in email:
+        return "skip", ""
+    domain_part = email.split("@")[-1].lower()
+    # Extract company keywords (ignore short words)
+    name_words = set(w.lower() for w in re.findall(r"[a-zA-Z]+", legal_name) if len(w) > 3)
+    domain_base = domain_part.split(".")[0]
+    # Check if any significant company word appears in domain
+    matches = [w for w in name_words if w in domain_base]
+    if matches:
+        return "match", f"Email domain '{domain_part}' contains company keyword(s): {', '.join(matches)}"
+    return "no_match", f"Email domain '{domain_part}' does not contain any keywords from '{legal_name}'"
 
 
 # ---------- checksums ----------
